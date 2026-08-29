@@ -1,8 +1,8 @@
-# Charte graphique — AstroSeen
+# Charte graphique // AstroSeen
 
 ## Direction
 
-**Sombre et immersif**, avec un accent technique bleu/cyan. L'identité s'appuie sur le vocabulaire réel des instruments d'observation — réticule de chercheur, graduations de coordonnées (ascension droite / déclinaison), lecture de données précises (seeing, Bortle) — plutôt que sur un simple thème "dark mode" générique. L'idée : que l'interface donne la sensation de consulter un instrument de précision autant qu'une application grand public.
+**Sombre et immersif**, avec un accent technique bleu/cyan. L'identité s'appuie sur le vocabulaire réel des instruments d'observation (réticule de chercheur, graduations de coordonnées (ascension droite / déclinaison), lecture de données précises (seeing, Bortle)) plutôt que sur un simple thème "dark mode" générique. L'idée : que l'interface donne la sensation de consulter un instrument de précision autant qu'une application grand public.
 
 ## Palette
 
@@ -16,7 +16,7 @@
 | Texte principal | `#e7e9f0` | Corps de texte — blanc cassé légèrement bleuté, pas de blanc pur (fatigue visuelle en usage nocturne) |
 | Texte atténué | `#8b93a7` | Légendes, métadonnées, texte secondaire |
 
-**Pourquoi pas un simple noir + cyan générique ?** Le fond est délibérément bleu-nuit (`#06070c`) plutôt que noir pur, et le cyan est associé à un second accent chaud (starlight) pour éviter l'écueil "fond quasi-noir + un seul accent vif", qui est un des trois looks par défaut les plus vus actuellement en design généré — ici, les deux accents ont chacun un rôle distinct et justifié (signal = données/technique, starlight = reconnaissance/chaleur), pas juste une déclinaison de la même couleur.
+**Pourquoi pas un simple noir + cyan générique ?** Le fond est délibérément bleu-nuit (`#06070c`) plutôt que noir pur, et le cyan est associé à un second accent chaud (starlight) pour éviter l'écueil "fond quasi-noir + un seul accent vif", qui est un des trois looks par défaut les plus vus actuellement en design généré. Ici, les deux accents ont chacun un rôle distinct et justifié (signal = données/technique, starlight = reconnaissance/chaleur), pas juste une déclinaison de la même couleur.
 
 ## Typographie
 
@@ -39,6 +39,6 @@ L'élément récurrent et reconnaissable de l'identité : de fines graduations e
 ## Principes d'usage
 
 - Un fond sombre partout, jamais de section en fond clair (casserait l'immersion "ciel nocturne").
-- Le starlight (`#f2b872`) reste rare et signifiant — badges, reconnaissance, jamais une couleur de bouton par défaut.
+- Le starlight (`#f2b872`) reste rare et signifiant -> badges, reconnaissance, jamais une couleur de bouton par défaut.
 - Le signal (`#4fd8e0`) porte les actions et les données techniques, pas la décoration.
-- Pas de dégradés, pas d'effets de lueur/neon — la profondeur vient des surfaces (`#10131f`, `#171b2c`), pas d'effets lumineux artificiels.
+- Pas de dégradés, pas d'effets de lueur/neon -> la profondeur vient des surfaces (`#10131f`, `#171b2c`), pas d'effets lumineux artificiels.
