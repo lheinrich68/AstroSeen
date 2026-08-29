@@ -1,0 +1,64 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: astroseen-db
+
+    environment:
+      POSTGRES_USER: astroseen
+      POSTGRES_PASSWORD: astroseen
+      POSTGRES_DB: astroseen
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U astroseen"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+
+  backend:
+    build: ./backend
+    container_name: astroseen-api
+    depends_on:
+        postgres:
+            condition: service_healthy
+
+    environment:
+      PORT: 3000
+      #? Nom du service Docker, pas "localhost" -> les conteneurs se joignent par leur nom sur le réseau compose
+      DATABASE_URL: postgres://astroseen:astroseen@postgres:5432/astroseen
+      JWT_SECRET: ChangeMeInProduction
+      JWT_EXPIRES_IN: 1h
+
+    ports:
+        - "3000:3000"
+
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+
+  frontend:
+    build: ./frontend
+    container_name: astroseen-frontend
+    depends_on:
+      - backend
+
+    environment:
+    # Cible du proxy Vite /api — le nom du service backend, pas localhost
+        VITE_API_PROXY_TARGET: http://backend:3000
+
+    ports:
+        - "5173:5173"
+
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  pgdata:

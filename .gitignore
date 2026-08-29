@@ -1,9 +1,16 @@
+node_modules/
+dist/
+build/
+.env
+.env.local
+package-lock.json
+*.log
+.DS_Store
+coverage/
+backend/src/generated/
 .idea
-# === Frontend ===
-frontend/node_modules
-frontend/package-lock.json
 
-# === Backend ===
-backend/node_modules
-backend/package-lock.json
-backend/.env
+# Réglages personnels d'assistants IA (Prisma Skills auto-installées), pas partagés avec l'équipe)
+.claude/
+.windsurf/
+.agents/
