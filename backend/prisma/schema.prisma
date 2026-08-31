@@ -1,0 +1,621 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// =====================================================================================================================
+// Tables de référence
+// =====================================================================================================================
+model Status_user {
+  id      Int    @id @default(autoincrement()) @map("id_status_user")
+  libelle String
+  users   User[]
+
+  @@map("status_user")
+}
+
+model Niveau_Experience {
+  id      Int    @id @default(autoincrement()) @map("id_niveau_experience")
+  libelle String
+  users   User[]
+
+  @@map("niveau_experience")
+}
+
+model Role {
+  id      Int    @id @default(autoincrement()) @map("id_role")
+  libelle String
+  users   User[]
+
+  @@map("role")
+}
+
+model Etat_Compte {
+  id      Int    @id @default(autoincrement()) @map("id_etat_compte")
+  libelle String
+  users   User[]
+
+  @@map("etat_compte")
+}
+
+model Visibilite_Participation {
+  id       Int       @id @default(autoincrement()) @map("id_visibilite_participation")
+  libelle  String
+  sessions Session[]
+
+  @@map("visibilite_participation")
+}
+
+model Type_Session {
+  id       Int       @id @default(autoincrement()) @map("id_type_session")
+  libelle  String
+  sessions Session[]
+
+  @@map("type_session")
+}
+
+model Statut_Session {
+  id       Int       @id @default(autoincrement()) @map("id_statut_session")
+  libelle  String
+  sessions Session[]
+
+  @@map("statut_session")
+}
+
+model Statut_Participation {
+  id             Int             @id @default(autoincrement()) @map("id_statut_participation")
+  libelle        String
+  participations Participation[]
+
+  @@map("statut_participation")
+}
+
+model Categorie_Ensemble {
+  id        Int        @id @default(autoincrement()) @map("id_categorie_ensemble")
+  libelle   String
+  ensembles Ensemble[]
+
+  @@map("categorie_ensemble")
+}
+
+model Type_Materiel {
+  id        Int        @id @default(autoincrement()) @map("id_type_materiel")
+  libelle   String
+  materiels Materiel[]
+
+  @@map("type_materiel")
+}
+
+model Classification_Astronomique {
+  id               Int     @id @default(autoincrement()) @map("id_classification_astronomique")
+  libelle          String
+  iconeVectorielle String? @map("icone_vectorielle") // icône SVG générique, fallback si filtre "mes photos" vide
+  objects          Objet[]
+
+  @@map("classification_astronomique")
+}
+
+model Type_Caracteristique {
+  id                    Int                     @id @default(autoincrement()) @map("id_type_caracteristique")
+  libelle               String
+  uniteParDefaut        String?                 @map("unite_par_defaut")
+  caracteristiquesObjet Caracteristique_Objet[]
+
+  @@map("type_caracteristique")
+}
+
+model Statut_Publication {
+  id      Int    @id @default(autoincrement()) @map("id_statut_publication")
+  libelle String
+  notes   Note[]
+
+  @@map("statut_publication")
+}
+
+model Meteo {
+  id      Int    @id @default(autoincrement()) @map("id_meteo")
+  libelle String
+  notes   Note[]
+
+  @@map("meteo")
+}
+
+model Source_Croquis {
+  id      Int       @id @default(autoincrement()) @map("id_source_croquis")
+  libelle String
+  croquis Croquis[]
+
+  @@map("source_croquis")
+}
+
+model Type_Contenu {
+  id       Int       @id @default(autoincrement()) @map("id_type_contenu")
+  libelle  String
+  contenus Contenu[]
+
+  @@map("type_contenu")
+}
+
+model Visibilite_Contenu {
+  id       Int       @id @default(autoincrement()) @map("id_visibilite_contenu")
+  libelle  String
+  contenus Contenu[]
+
+  @@map("visibilite_contenu")
+}
+
+model Type_Evenement_Astro {
+  id         Int               @id @default(autoincrement()) @map("id_type_evenement_astro")
+  libelle    String
+  evenements Evenement_Astro[]
+
+  @@map("type_evenement_astro")
+}
+
+model Niveau_Importance_Evenement {
+  id         Int               @id @default(autoincrement()) @map("id_niveau_importance_evenement")
+  libelle    String
+  evenements Evenement_Astro[]
+
+  @@map("niveau_importance_evenement")
+}
+
+// =====================================================================================================================
+// UUID => Entités adressables directement
+// =====================================================================================================================
+model User {
+  id             String  @id @default(uuid()) @map("id_user")
+  pseudo         String  @unique
+  email          String  @unique
+  hashedPassword String  @map("hashed_pswd")
+  nomAffiche     String? @map("nom_affiche")
+  bio            String?
+
+  statut   Status_user @relation(fields: [statutId], references: [id])
+  statutId Int         @map("id_status_user")
+
+  niveauExperience   Niveau_Experience @relation(fields: [niveauExperienceId], references: [id])
+  niveauExperienceId Int               @map("id_niveau_experience")
+
+  role   Role @relation(fields: [roleId], references: [id])
+  roleId Int  @map("id_role")
+
+  astronomeCertifie Boolean @map("astronome_certifie")
+
+  certifiePar       User?     @relation("Certification", fields: [certifieParId], references: [id])
+  certifieParId     String?   @map("certifie_par")
+  certifications    User[]    @relation("Certification")
+  dateCertification DateTime? @map("date_certification")
+
+  dateConsentementCgu   DateTime? @map("date_consentement_cgu")
+  dateDerniereConnexion DateTime? @map("date_derniere_connexion")
+
+  // BANNI/SUPPRIME : le contenu (sessions, notes, photos, commentaires...)
+  // reste lié à cette même ligne. C'est cet état qui fait afficher
+  // "user anonyme" à la lecture, pas une réassignation de FK.
+  // SUPPRIME va plus loin : email/motDePasseHash/nomAffiche/bio/pseudo sont
+  // réellement écrasés (-> droit à l'effacement RGPD).
+  etatCompte   Etat_Compte @relation(fields: [etatCompteId], references: [id])
+  etatCompteId Int         @map("id_etat_compte")
+
+  photoProfil String? @map("photo_profil")
+
+  // Vérification email à la création du compte.
+  emailVerifie        Boolean   @default(false) @map("email_verifie")
+  tokenVerifEmail     String?   @map("token_verif_email")
+  dateExpirationToken DateTime? @map("date_expiration_token")
+  dateVerifEmail      DateTime? @map("date_verif_email")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  sessionsCreees  Session[]         @relation("SessionCreateur")
+  participations  Participation[]
+  lieux           Lieu[]
+  ensembles       Ensemble[]
+  notes           Note[]
+  photos          Photo[]
+  commentaires    Commentaire[]
+  mentionsJaime   Mention_Jaime[]
+  evenementsCrees Evenement_Astro[]
+
+  @@map("user")
+}
+
+model Session {
+  id          String    @id @default(uuid()) @map("id_session")
+  titre       String
+  description String?
+  dateDebut   DateTime  @map("date_debut") @db.Date
+  heureDebut  DateTime? @map("heure_debut") @db.Time
+  dateFin     DateTime? @map("date_fin") @db.Date
+
+  statut   Statut_Session @relation(fields: [statutId], references: [id])
+  statutId Int            @map("id_statut_session")
+
+  visibiliteParticipation   Visibilite_Participation @relation(fields: [visibiliteParticipationId], references: [id])
+  visibiliteParticipationId Int                      @map("id_visibilite_participation")
+
+  typeSession   Type_Session? @relation(fields: [typeSessionId], references: [id])
+  typeSessionId Int?          @map("id_type_session")
+
+  creePar   User   @relation("SessionCreateur", fields: [creeParId], references: [id])
+  creeParId String @map("id_createur")
+
+  lieuParDefaut   Lieu? @relation(fields: [lieuParDefautId], references: [id])
+  lieuParDefautId Int?  @map("id_lieu_par_defaut")
+
+  participations Participation[]
+  notes          Note[]
+  photos         Photo[]
+
+  contenu   Contenu @relation(fields: [contenuId], references: [id])
+  contenuId Int     @unique @map("id_contenu")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("session")
+}
+
+model Note {
+  id String @id @default(uuid()) @map("id_note")
+
+  // Nuit précise, pré-remplie depuis session.dateDebut, modifiable si la
+  // session s'étale sur plusieurs nuits.
+  dateNote DateTime @map("date_note") @db.Date
+
+  seeingPickering Int?   @map("seeing_picker") // 1 à 10 => 1= très mauvaise turbulence ; 10= Parfaite turbulence
+  transpatence    Float?
+  temperature     Float?
+  humidite        Float?
+  pression        Float?
+
+  meteo   Meteo? @relation(fields: [meteoId], references: [id])
+  meteoId Int?   @map("id_meteo")
+
+  evenementImprevus String? @map("evenement_imprevus")
+
+  statutPublication   Statut_Publication @relation(fields: [statutPublicationId], references: [id])
+  statutPublicationId Int                @map("id_statut_publication")
+
+  ascensionDroite Float? @map("ascension_droite")
+  declinaison     Float?
+  azimuth         Float?
+  hauteur         Float?
+
+  heureDebut DateTime? @map("heure_debut") @db.Time
+  heureFin   DateTime? @map("heure_fin") @db.Time
+
+  session   Session @relation(fields: [sessionId], references: [id])
+  sessionId String  @map("id_session")
+
+  redigePar   User   @relation(fields: [redigeParId], references: [id])
+  redigeParId String @map("id_redacteur")
+
+  lieu   Lieu? @relation(fields: [lieuId], references: [id])
+  lieuId Int?  @map("id_lieu")
+
+  ensemble   Ensemble? @relation(fields: [ensembleId], references: [id])
+  ensembleId Int?      @map("id_ensemble")
+
+  objet   Objet?  @relation(fields: [objetId], references: [id])
+  objetId String? @map("id_objet")
+
+  photos  Photo[]
+  croquis Croquis[]
+
+  contenu   Contenu @relation(fields: [contenuId], references: [id])
+  contenuId Int     @unique @map("id_contenu")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("note")
+}
+
+model Photo {
+  id        String   @id @default(uuid()) @map("id_photo")
+  datePrise DateTime @map("date_prise")
+
+  session   Session? @relation(fields: [sessionId], references: [id])
+  sessionId String?  @map("id_session")
+
+  note   Note?   @relation(fields: [noteId], references: [id])
+  noteId String? @map("id_note")
+
+  ensemble   Ensemble? @relation(fields: [ensembleId], references: [id])
+  ensembleId Int?      @map("id_ensemble")
+
+  objet   Objet?  @relation(fields: [objetId], references: [id])
+  objetId String? @map("id_objet")
+
+  publiePar   User   @relation(fields: [publieParId], references: [id])
+  publieParId String @map("id_user")
+
+  detailsAstrophoto Details_Astrophoto?
+
+  contenu   Contenu @relation(fields: [contenuId], references: [id])
+  contenuId Int     @unique @map("id_contenu")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("photo")
+}
+
+model Objet {
+  id  String @id @default(uuid()) @map("id_objet")
+  nom String
+
+  classification   Classification_Astronomique @relation(fields: [classificationId], references: [id])
+  classificationId Int                         @map("id_classification_astronomique")
+
+  description    String?
+  histoire       String?
+  imageReference String? @map("image_reference") // image de couverture officielle/admin
+
+  designations     Designation[]
+  notes            Note[]
+  photos           Photo[]
+  evenements       Evenement_Astro[]
+  caracteristiques Caracteristique_Objet[]
+
+  @@map("objet")
+}
+
+model Evenement_Astro {
+  id          String    @id @default(uuid()) @map("id_evenement_astro")
+  titre       String
+  description String?
+  dateDebut   DateTime  @map("date_debut")
+  dateFin     DateTime? @map("date_fin")
+
+  typeEvenement      Type_Evenement_Astro        @relation(fields: [typeEvenementId], references: [id])
+  typeEvenementId    Int                         @map("id_type_evenement_astro")
+  niveauImportance   Niveau_Importance_Evenement @relation(fields: [niveauImportanceId], references: [id])
+  niveauImportanceId Int                         @map("id_niveau_importance_evenement")
+
+  objet   Objet?  @relation(fields: [objetId], references: [id])
+  objetId String? @map("id_objet")
+
+  creePar   User   @relation(fields: [creeParId], references: [id])
+  creeParId String @map("id_createur")
+
+  @@map("evenement_astro")
+}
+
+// =====================================================================================================================
+// BigInt/autoincrement : tables internes, jamais leur propre URL
+// =====================================================================================================================
+model Participation {
+  id Int @id @default(autoincrement()) @map("id_participation")
+
+  statut   Statut_Participation @relation(fields: [statutId], references: [id])
+  statutId Int                  @map("id_statut_participation")
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @map("id_user")
+
+  session   Session @relation(fields: [sessionId], references: [id])
+  sessionId String  @map("id_session")
+
+  @@unique([userId, sessionId])
+  @@map("participation")
+}
+
+model Lieu {
+  id        Int    @id @default(autoincrement()) @map("id_lieu")
+  nom       String
+  latitude  Float
+  longitude Float
+  bortle    Int?
+
+  proprietaire   User   @relation(fields: [proprietaireId], references: [id])
+  proprietaireId String @map("id_proprietaire")
+
+  sessionParDefaut Session[]
+  notes            Note[]
+
+  @@map("lieu")
+}
+
+model Ensemble {
+  id  Int    @id @default(autoincrement()) @map("id_ensemble")
+  nom String
+
+  categorie   Categorie_Ensemble @relation(fields: [categorieId], references: [id])
+  categorieId Int                @map("id_categorie_ensemble")
+
+  proprietaire   User   @relation(fields: [proprietaireId], references: [id])
+  proprietaireId String @map("id_proprietaire")
+
+  materiels Ensemble_Materiel[]
+  notes     Note[]
+  photos    Photo[]
+
+  @@map("ensemble")
+}
+
+model Materiel {
+  id               Int     @id @default(autoincrement()) @map("id_materiel")
+  marque           String?
+  modele           String?
+  caracteristiques String?
+
+  typeMateriel   Type_Materiel @relation(fields: [typeMaterielId], references: [id])
+  typeMaterielId Int           @map("id_type_materiel")
+
+  ensembles Ensemble_Materiel[]
+
+  // Dédoublonnage : deux users avec le même modèle pointent vers la
+  // même fiche plutôt que d'en créer une copie (find-or-create côté API).
+  // Suppression conditionnelle gérée par un trigger SQL, pas ici — voir
+  // cleanup_materiel_orphelin() dans mpd_astroseen.sql.
+  @@unique([typeMaterielId, marque, modele])
+  @@map("materiel")
+}
+
+model Ensemble_Materiel {
+  id Int @id @default(autoincrement()) @map("id_ensemble_materiel")
+
+  ensemble   Ensemble @relation(fields: [ensembleId], references: [id])
+  ensembleId Int      @map("id_ensemble")
+
+  materiel   Materiel @relation(fields: [materielId], references: [id])
+  materielId Int      @map("id_materiel")
+
+  @@unique([ensembleId, materielId])
+  @@map("ensemble_materiel")
+}
+
+model Croquis {
+  id    Int    @id @default(autoincrement()) @map("id_croquis")
+  image String
+
+  source   Source_Croquis @relation(fields: [sourceId], references: [id])
+  sourceId Int            @map("id_source_croquis")
+
+  dateCreation DateTime @default(now()) @map("date_creation")
+
+  note   Note   @relation(fields: [noteId], references: [id])
+  noteId String @map("id_note")
+
+  @@map("croquis")
+}
+
+model Details_Astrophoto {
+  id                  Int     @id @default(autoincrement()) @map("id_details_astrophoto")
+  gainIso             String? @map("gain_iso")
+  ouverture           Float?
+  focaleEffective     Float?  @map("focale_effective")
+  nombreDarks         Int?    @map("nombre_darks")
+  nombreBias          Int?    @map("nombre_bias")
+  logicielAcquisition String? @map("logiciel_acquisition")
+  logicielTraitement  String? @map("logiciel_traitement")
+  methodeEmpilement   String? @map("methode_empilement")
+
+  photo   Photo  @relation(fields: [photoId], references: [id])
+  photoId String @unique @map("id_photo")
+
+  acquisitionsFiltre Acquisition_Filtre[]
+
+  @@map("details_astrophoto")
+}
+
+model Acquisition_Filtre {
+  id          Int    @id @default(autoincrement()) @map("id_acquisition_filtre")
+  filtre      String
+  tempsPose   Float? @map("temps_pose")
+  nombrePoses Int?   @map("nombre_poses")
+  nombreFlats Int?   @map("nombre_flats")
+
+  detailsAstrophoto   Details_Astrophoto @relation(fields: [detailsAstrophotoId], references: [id])
+  detailsAstrophotoId Int                @map("id_details_astrophoto")
+
+  @@map("acquisition_filtre")
+}
+
+model Designation {
+  id        Int    @id @default(autoincrement()) @map("id_designation")
+  catalogue String
+  code      String
+
+  objet   Objet  @relation(fields: [objetId], references: [id])
+  objetId String @map("id_objet")
+
+  @@unique([catalogue, code])
+  @@map("designation")
+}
+
+model Caracteristique_Objet {
+  id Int @id @default(autoincrement()) @map("id_caracteristique_objet")
+
+  objet   Objet  @relation(fields: [objetId], references: [id])
+  objetId String @map("id_objet")
+
+  type   Type_Caracteristique @relation(fields: [typeId], references: [id])
+  typeId Int                  @map("id_type_caracteristique")
+
+  valeur String
+  unite  String? // surcharge uniteParDefaut si besoin (ex: parsecs plutôt qu'années-lumière)
+
+  @@unique([objetId, typeId])
+  @@map("caracteristique_objet")
+}
+
+model Contenu {
+  id Int @id @default(autoincrement()) @map("id_contenu")
+
+  type         Type_Contenu       @relation(fields: [typeId], references: [id])
+  typeId       Int                @map("id_type_contenu")
+  visibilite   Visibilite_Contenu @relation(fields: [visibiliteId], references: [id])
+  visibiliteId Int                @map("id_visibilite_contenu")
+
+  datePublication DateTime? @map("date_publication")
+
+  session Session?
+  note    Note?
+  photo   Photo?
+
+  commentaires  Commentaire[]
+  mentionsJaime Mention_Jaime[]
+  tags          Association_Tag[]
+
+  @@map("contenu")
+}
+
+model Commentaire {
+  id    Int      @id @default(autoincrement()) @map("id_commentaire")
+  texte String
+  date  DateTime @default(now())
+
+  auteur    User    @relation(fields: [auteurId], references: [id])
+  auteurId  String  @map("id_auteur")
+  contenu   Contenu @relation(fields: [contenuId], references: [id])
+  contenuId Int     @map("id_contenu")
+
+  @@map("commentaire")
+}
+
+model Mention_Jaime {
+  id   Int      @id @default(autoincrement()) @map("id_mention_jaime")
+  date DateTime @default(now())
+
+  user      User    @relation(fields: [userId], references: [id])
+  userId    String  @map("id_user")
+  contenu   Contenu @relation(fields: [contenuId], references: [id])
+  contenuId Int     @map("id_contenu")
+
+  @@unique([userId, contenuId])
+  @@map("mention_jaime")
+}
+
+model Tag {
+  id           Int               @id @default(autoincrement()) @map("id_tag")
+  nom          String            @unique
+  associations Association_Tag[]
+
+  @@map("tag")
+}
+
+model Association_Tag {
+  id Int @id @default(autoincrement()) @map("id_association_tag")
+
+  tag       Tag     @relation(fields: [tagId], references: [id])
+  tagId     Int     @map("id_tag")
+  contenu   Contenu @relation(fields: [contenuId], references: [id])
+  contenuId Int     @map("id_contenu")
+
+  @@unique([tagId, contenuId])
+  @@map("association_tag")
+}
