@@ -177,7 +177,7 @@ Un croquis est soit une image importée par l'utilisateur, soit un dessin réali
 
 ### Publication et interactions communautaires (nouvelle abstraction : Contenu)
 
-Trois nouveaux besoins partagent tous la même mécanique : rendre publique une Session, une Note ou une Photo (par défaut privée, visible uniquement par les participants de la session), et permettre à la communauté de commenter, aimer et étiqueter ce contenu publié, pour alimenter un fil d'actualité filtrable.
+Trois nouveaux besoins partagent tous la même mécanique : faire progresser une Session, une Note ou une Photo à travers trois niveaux de visibilité (brouillon privé → partagé avec les participants de la session → publié au fil d'actualité), et permettre à la communauté de commenter, aimer et étiqueter le contenu une fois publié, pour alimenter un fil d'actualité filtrable.
 
 Plutôt que de dupliquer trois fois (Session, Note, Photo) les mêmes mécaniques de visibilité, de commentaires, de likes et de tags, on introduit une table technique commune :
 
@@ -187,6 +187,8 @@ Plutôt que de dupliquer trois fois (Session, Note, Photo) les mêmes mécanique
 - `date_publication` (optionnel, renseigné au moment du passage en `publique`)
 
 `Session`, `Note` et `Photo` sont chacune reliées en 1-1 à une ligne `Contenu`, créée automatiquement à leur création. `Commentaire`, la nouvelle `Mention j'aime` et le nouveau système de `Tag` se rattachent tous à `Contenu` plutôt qu'à chacune des trois tables séparément.
+
+**Règle de filtrage du fil d'actualité** : seuls les `Contenu` où `visibilite = publique` y apparaissent. Un contenu en `session` reste invisible au fil tant qu'il n'est pas explicitement publié — il n'est visible que par les participants de la session concernée (requête à filtrer côté application : `Contenu.visibilite = publique` pour le fil, vs. `visibilite IN (session, publique)` ET appartenance à la session pour la vue "notes de la session").
 
 **Commentaire — portée élargie** : se rattache désormais à `Contenu` (donc à une session, une note ou une photo indifféremment) au lieu de `Session` uniquement comme en v1/v2 — cohérent avec le fil d'actualité qui affiche des items individuels commentables.
 
