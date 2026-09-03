@@ -151,9 +151,10 @@ model Visibilite_Contenu {
 }
 
 model Type_Evenement_Astro {
-  id         Int               @id @default(autoincrement()) @map("id_type_evenement_astro")
-  libelle    String
-  evenements Evenement_Astro[]
+  id               Int               @id @default(autoincrement()) @map("id_type_evenement_astro")
+  libelle          String
+  iconeVectorielle String?           @map("icone_vectorielle") // icône propre à chaque type, identification visuelle rapide
+  evenements       Evenement_Astro[]
 
   @@map("type_evenement_astro")
 }

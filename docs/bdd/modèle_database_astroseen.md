@@ -1,4 +1,4 @@
-# Modèle de données — Application d'observations du ciel nocturne (v2)
+# Modèle de données // AstroSeen
 
 ## Contexte de cette révision
 
@@ -12,7 +12,7 @@ La v1 n'ayant jamais été mise en production, cette révision corrige aussi dir
 
 ## Modifications sur les entités existantes
 
-### Utilisateur — étendu
+### Utilisateur -> étendu
 - `pseudo`
 - `email` — **absent par erreur des versions précédentes du modèle**, alors que c'est le champ d'identification de base pour l'authentification JWT
 - `mot_de_passe_hash` (jamais stocké en clair — hachage bcrypt ou argon2)
@@ -41,28 +41,31 @@ Décision transversale : **aucun type énuméré** (enum PostgreSQL/Prisma) dans
 
 17 tables de référence au total :
 
-| Table | Rattachée à | Valeurs de départ |
-|---|---|---|
-| Statut utilisateur | Utilisateur | Amateur, Professionnel |
-| Niveau d'expérience | Utilisateur | Débutant, Confirmé, Expert |
-| Rôle plateforme | Utilisateur | Membre, Modérateur, Administrateur |
-| Etat compte | Utilisateur | Actif, Banni, Supprimé |
-| Visibilité participation | Session | Publique, Privée, Sur invitation |
-| Type session | Session (optionnel) | Loisir, Campagne, Formation |
-| Statut session | Session | Planifiée, En cours, Terminée, Annulée |
-| Statut participation | Participation | Invitée, Confirmée, Refusée |
-| Catégorie ensemble | Ensemble | Classique, Astrophoto |
-| Type matériel | Matériel | Télescope, Monture, Caméra, Oculaire, Filtre, Réducteur de focale, Barlow, Autoguideur, Trépied, Autre |
-| Classification astronomique | Objet | Étoile, Étoile variable, Planète, Planète naine, Comète, Astéroïde, Galaxie, Nébuleuse, Amas ouvert, Amas globulaire, Étoile à neutrons, Supernova, Reste de supernova, Satellite, Autre |
-| Type caractéristique | Caractéristique objet | Magnitude apparente, Distance, Taille apparente, Constellation, Type spectral, Type morphologique, Période orbitale, Redshift, Vitesse radiale, Masse, Rayon, Température de surface, Ascension droite (catalogue), Déclinaison (catalogue), Autre |
-| Statut publication note | Note | Brouillon, Publiée |
-| Source croquis | Croquis | Importé, Dessiné |
-| Type contenu | Contenu | Session, Note, Photo |
-| Visibilité contenu | Contenu | Privée, Publique |
-| Type événement astro | Événement astronomique | Éclipse, Pluie de météores, Opposition, Conjonction, Transit, Occultation, Autre |
-| Niveau importance événement | Événement astronomique | Majeur, Mineur |
+| Table | Rattachée à | Valeurs de départ | Éditable via le panel admin |
+|---|---|---|---|
+| Statut utilisateur | Utilisateur | Amateur, Professionnel | Oui |
+| Niveau d'expérience | Utilisateur | Débutant, Confirmé, Expert | Oui |
+| Rôle plateforme | Utilisateur | Membre, Modérateur, Administrateur | **Non** — pilote les permissions codées en dur |
+| Etat compte | Utilisateur | Actif, Banni, Supprimé | Oui |
+| Visibilité participation | Session | Publique, Privée, Sur invitation | Oui |
+| Type session | Session (optionnel) | Loisir, Campagne, Formation | **Non** |
+| Statut session | Session | Planifiée, En cours, Terminée, Annulée | **Non** — pilote probablement une machine à états côté backend |
+| Statut participation | Participation | Invitée, Confirmée, Refusée | Oui |
+| Catégorie ensemble | Ensemble | Classique, Astrophoto | Oui |
+| Type matériel | Matériel | Télescope, Monture, Caméra, Oculaire, Filtre, Réducteur de focale, Barlow, Autoguideur, Trépied, Autre | Oui |
+| Classification astronomique | Objet | Étoile, Étoile variable, Planète, Planète naine, Comète, Astéroïde, Galaxie, Nébuleuse, Amas ouvert, Amas globulaire, Étoile à neutrons, Supernova, Reste de supernova, Satellite, Autre | Oui |
+| Type caractéristique | Caractéristique objet | Magnitude apparente, Distance, Taille apparente, Constellation, Type spectral, Type morphologique, Période orbitale, Redshift, Vitesse radiale, Masse, Rayon, Température de surface, Ascension droite (catalogue), Déclinaison (catalogue), Autre | Oui |
+| Statut publication note | Note | Brouillon, Publiée | Oui |
+| Source croquis | Croquis | Importé, Dessiné | Oui |
+| Type contenu | Contenu | Session, Note, Photo | Oui |
+| Visibilité contenu | Contenu | Privée, Publique | Oui |
+| Type événement astro | Événement astronomique | Éclipse, Pluie de météores, Opposition, Conjonction, Transit, Occultation, Autre | Oui |
+| Niveau importance événement | Événement astronomique | Majeur, Mineur | Oui |
+| Météo | Note | Dégagé, Partiellement nuageux, Nuageux, Couvert, Brumeux, Pluie, Vent fort, Orageux, Autre | **Non** |
 
-### Compte banni ou supprimé — anonymisation plutôt que suppression en cascade
+**Tables verrouillées (non éditables via le panel admin)** : `Rôle plateforme`, `Type session`, `Statut session`, `Météo`. Ces tables sont référencées par de la logique applicative codée en dur (vérifications de permission, machine à états, taxonomie fixe) — les modifier via une UI générique risquerait de désynchroniser le code et les données plutôt que d'apporter une vraie flexibilité. Toute évolution de ces tables passe par le code + une migration, pas par le panel admin.
+
+### Compte banni ou supprimé -> anonymisation plutôt que suppression en cascade
 Résout le point resté ouvert en section 9.3 du cahier des charges. Plutôt que de supprimer ou réassigner les notes/photos/sessions/commentaires d'un utilisateur banni ou supprimé (ce qui casserait l'historique des autres participants et forcerait à toucher sept tables différentes qui référencent `Utilisateur`), le contenu **reste lié à la même ligne `Utilisateur`** — c'est l'état de ce compte qui change, et l'affichage « Utilisateur anonyme » est dérivé de cet état à la lecture, pas stocké nulle part ailleurs.
 
 - `Etat compte` : *actif* / *banni* / *supprimé*
@@ -74,7 +77,7 @@ Résout le point resté ouvert en section 9.3 du cahier des charges. Plutôt que
 Aucune modification nécessaire sur `Session`, `Note`, `Photo`, `Commentaire`, `Lieu`, `Ensemble`, `Participation`, `Mention j'aime` ou `Événement astronomique` : leurs relations vers `Utilisateur` ne changent pas, seul l'état de la ligne référencée change.
 
 
-### Session — étendu
+### Session -> étendu
 - `description` (texte libre, optionnel) — précise le contexte/l'objectif de la sortie, ex. « Observation entre amis des étoiles du ciel profond à la recherche d'une étoile binaire »
 - `date_debut` (date, obligatoire) — le jour de début est toujours connu
 - `heure_debut` (heure, optionnelle) — précisée séparément si l'heure de rendez-vous entre participants est déjà fixée, sinon laissée vide tant qu'elle n'est pas connue
@@ -82,7 +85,7 @@ Aucune modification nécessaire sur `Session`, `Note`, `Photo`, `Commentaire`, `
 - rattachée à une `Visibilité participation` (table de référence : publique/privée/sur invitation) — qui peut rejoindre ou voir l'existence de la session (à ne pas confondre avec la publication du contenu résultant, voir plus bas)
 - rattachée en optionnel à un `Type session` (table de référence : loisir/campagne/formation)
 
-### Lieu — étendu
+### Lieu -> étendu
 - `bortle` (int, 1 à 9) — échelle de pollution lumineuse du site. Portée volontairement sur `Lieu` plutôt que sur `Note` : c'est une caractéristique du site (généralement stable, documentée par les cartes de pollution lumineuse), pas une condition ponctuelle de la nuit — contrairement au seeing ou à la transparence. Comme une Note peut déjà surcharger le lieu par défaut de la Session, le Bortle suit automatiquement sans champ supplémentaire à dupliquer.
 
 **Lieux communs entre utilisateurs** : bien que le catalogue `Lieu` reste personnel à chaque utilisateur (un `Lieu` appartient à un seul propriétaire), une fonctionnalité affiche « X autres personnes observent depuis cet endroit » en comparant les coordonnées d'un lieu à celles des lieux d'autres utilisateurs, arrondies à 3 décimales (~110 m, échelle d'un site/parking) pour regrouper des saisies proches mais jamais identiques au chiffre près. Aucune nouvelle table : c'est une requête agrégée à la volée, appuyée par un index d'expression sur les coordonnées arrondies (voir `mpd_astroseen.sql`). Seul le nombre de personnes est affiché, jamais leur identité — pas de fuite d'information au-delà d'un compte anonyme.
@@ -93,7 +96,7 @@ Le champ `type` de `Matériel` recouvre des choses trop diverses (télescope, mo
 **Type_Materiel** (nouvelle)
 - `libelle` — valeurs de départ : *Télescope*, *Monture*, *Caméra*, *Oculaire*, *Filtre*, *Réducteur de focale*, *Barlow*, *Autoguideur*, *Trépied*, *Autre*
 
-### Ensemble / Matériel — relation N-N, catalogue partagé et suppression conditionnelle
+### Ensemble / Matériel -> relation N-N, catalogue partagé et suppression conditionnelle
 Un même appareil physique (une caméra, un oculaire, une monture...) peut appartenir à **plusieurs** `Ensemble` — par exemple une caméra utilisée à la fois dans un setup « visuel club » et un setup « astrophoto Ha/OIII/SII ». La relation `Ensemble`–`Matériel` passe donc de 1-N à **N-N**, via une table de jointure :
 
 **Ensemble_Materiel** (nouvelle, jointure N-N)
@@ -104,7 +107,7 @@ Un même appareil physique (une caméra, un oculaire, une monture...) peut appar
 - **Dédoublonnage** : contrainte d'unicité sur (`type`, `marque`, `modèle`) — le `type` étant désormais une référence vers `Type_Materiel` plutôt qu'un texte libre — si un modèle de télescope existe déjà en base, une nouvelle personne qui l'ajoute est reliée à la fiche existante plutôt que d'en créer une copie. Ça implique une recherche/autocomplétion côté saisie (« ce modèle existe déjà, voulez-vous le réutiliser ? ») plutôt qu'un simple formulaire libre. Un matériel sans marque/modèle renseigné (générique, sans info suffisante pour matcher) reste dédupliqué au cas par cas, sans forcer de fusion hasardeuse.
 - **Suppression conditionnelle** : retirer un matériel de sa propre liste ne fait que supprimer le lien `Ensemble_Materiel` correspondant — la fiche `Matériel` elle-même n'est supprimée de la base que si **plus aucun** `Ensemble_Materiel` ne la référence. Cette règle est implémentée par un trigger côté base (voir `mpd_astroseen.sql`), pas seulement côté application, pour garantir qu'elle s'applique quel que soit le chemin de suppression emprunté.
 
-### Note — conditions structurées et correction de cardinalité
+### Note -> conditions structurées et correction de cardinalité
 - `date_note` (date, obligatoire) — la nuit précise à laquelle porte cette note. Pré-remplie automatiquement depuis `Session.date_debut` à la création, mais modifiable : une session peut s'étaler sur plusieurs nuits, une note doit pouvoir préciser sur laquelle elle porte, indépendamment de l'heure exacte (`heure_debut`/`heure_fin`, toujours optionnelles ci-dessous).
 - `seeing_pickering` (int, 1 à 10) — **seule échelle stockée en base**, la plus précise des deux. L'échelle d'Antoniadi (I à V, avec le libellé qualité *Parfaite / Très bonne / Moyenne / Mauvaise / Très mauvaise*) est dérivée à l'affichage par une table de correspondance fixe côté application (pas une table en base, puisque c'est une conversion figée, pas une donnée) :
 
@@ -154,7 +157,7 @@ Un objet peut ainsi porter autant de caractéristiques que pertinent pour son ty
 
 **Cas particulier : position catalogue pour les objets fixes.** `Ascension droite (catalogue)` et `Déclinaison (catalogue)` ne concernent que les objets dont la position dans le ciel est quasi invariable (galaxies, nébuleuses, amas...), à la différence des `Note.ascension_droite`/`declinaison` qui capturent la position observée à un instant précis. Une planète comme Jupiter n'a jamais ces deux caractéristiques renseignées : sa position change de nuit en nuit, une valeur fixe serait fausse dès le lendemain.
 
-### Détails astrophoto — support multi-filtres
+### Détails astrophoto -> support multi-filtres
 Une acquisition LRGB ou en bande étroite utilise plusieurs filtres avec des temps de pose, un nombre de poses et un nombre de flats différents pour chacun (contrairement aux darks/bias, indépendants du filtre). La v1 ne pouvait décrire qu'une acquisition mono-filtre. On sort ces champs dans une sous-table :
 
 **Détails astrophoto** (allégée)
@@ -166,7 +169,7 @@ Une acquisition LRGB ou en bande étroite utilise plusieurs filtres avec des tem
 - `filtre`
 - `temps_pose`, `nombre_poses`, `nombre_flats`
 
-### Croquis (nouvelle entité)
+### Croquis
 Un croquis est soit une image importée par l'utilisateur, soit un dessin réalisé directement sur un canevas intégré à l'application puis enregistré comme image — dans les deux cas, la donnée stockée est la même (un fichier image), seule son origine diffère.
 - `image` (fichier)
 - rattaché à une `Source croquis` (table de référence : importé/dessiné)
@@ -204,7 +207,7 @@ Plutôt que de dupliquer trois fois (Session, Note, Photo) les mêmes mécanique
 
 **Croquis** : pas de ligne `Contenu` propre — un croquis suit la visibilité de la `Note` à laquelle il est rattaché, il n'est jamais publié indépendamment.
 
-### Objet — planétarium (catalogue consultable)
+### Objet -> planétarium (catalogue consultable)
 Pour servir de page « fiche objet » consultable librement (façon Pokédex), `Objet` porte :
 - `nom` (nom usuel affiché, ex. *Lune*, *Nébuleuse d'Orion* — distinct des codes de catalogue portés par `Désignation`)
 - `description` (texte — présentation générale, courte)
@@ -215,28 +218,22 @@ Pour servir de page « fiche objet » consultable librement (façon Pokédex), `
 La page « fiche objet » du planétarium affiche les `Photo` où `objet = cet objet` et `Contenu.visibilite = publique`, avec un filtre **Images personnelles / Images communautaires** qui ne fait que distinguer, à l'affichage, les photos dont l'auteur est l'utilisateur connecté de celles publiées par les autres — aucune structure supplémentaire n'est nécessaire, c'est une simple requête filtrée sur les relations déjà existantes (`Photo.publie_par` + `Contenu.visibilite`).
 
 
-### Calendrier — événements astronomiques (nouvelle entité)
+### Calendrier -> événements astronomiques
 Le calendrier combine deux sources bien distinctes, à ne pas mélanger dans une seule table :
 - les **sessions de l'utilisateur** (créées par lui, ou auxquelles il a une `Participation` acceptée) — déjà entièrement modélisées via `Session`/`Participation`, aucune nouvelle structure nécessaire, c'est une simple requête combinée à l'affichage ;
 - les **événements astronomiques** (éclipses, pluies de météores, oppositions planétaires...), qui n'existent pas encore et sont gérés par un administrateur plutôt que par les utilisateurs.
 
-**Événement astronomique** (nouvelle entité)
+**Événement astronomique**
 - `titre`
 - `description`
 - `date_debut`, `date_fin` (optionnel — nul pour un événement ponctuel comme une éclipse, renseigné pour une période comme un pic de pluie de météores)
-- rattaché à un `Type événement astro` (table de référence : éclipse, pluie de météores, opposition planétaire, conjonction, transit, occultation, autre)
+- rattaché à un `Type événement astro` (table de référence : éclipse, pluie de météores, opposition planétaire, conjonction, transit, occultation, autre) — comme `Classification_astronomique`, cette table de référence porte un champ `icone_vectorielle` (optionnel) : une icône propre à chaque type, pour l'identifier visuellement au premier coup d'œil (calendrier, panel admin, fiche événement) sans devoir lire le libellé
 - rattaché à un `Niveau importance événement` (table de référence : majeur/mineur), comme demandé — un simple champ de classification, distinct de `Type événement astro`, pour permettre un filtrage grossier sans devoir connaître toutes les catégories
 - rattaché en optionnel à un `Objet` (ex. une opposition de Jupiter pointe vers l'entrée Jupiter du catalogue)
 - créé par un `Utilisateur` — en pratique un `admin`, contrainte appliquée au niveau applicatif plutôt que par le schéma (pas de rôle dédié dans le modèle pour ça, `role_plateforme = admin` suffit)
 
 
-
-## Extensions optionnelles — reportées
-
-Organisation et Programme restent une bonne piste pour plus tard (campagnes coordonnées, matériel d'équipe), mais sont volontairement laissées hors du MVP tant que le besoin n'est pas confirmé par l'usage réel de la plateforme.
-
 ### Signalement et modération de contenu (à implémenter plus tard, via une nouvelle migration)
-Conçu au moment des diagrammes UML (le cas d'utilisation « Modérer un contenu signalé » n'avait pas encore de support en base). Développement volontairement reporté à la phase modération — documenté ici pour ne pas perdre la conception.
 
 **Signalement** (nouvelle entité)
 - rattaché à un `Contenu` (ce qui est signalé) et à un `Utilisateur` (qui signale)
@@ -506,11 +503,11 @@ erDiagram
   }
 ```
 
-## Notes d'implémentation (pas des choix de modélisation, juste à ne pas oublier)
+## Notes d'implémentation
 - Contrainte d'unicité sur `Participation` : un même utilisateur ne doit apparaître qu'une fois par session.
 - `heure_debut`/`heure_fin` (Note) et `date_prise` (Photo) : à stocker en UTC, en gardant le lien vers le fuseau horaire du lieu pour l'affichage — une session peut traverser minuit ou s'étaler sur plusieurs nuits.
 
-## Points encore ouverts (repoussés, pas oubliés)
+## Points encore ouverts
 - **Organisation / Programme** : cf. ci-dessus, à activer si le besoin se confirme.
 - **Matériel rattaché à un seul Ensemble** : résolu — voir section dédiée ci-dessus (relation N-N via `Ensemble_Materiel`).
 - **Historique du matériel figé dans le temps** : une Note/Photo référence un Ensemble vivant, pas une composition figée à l'instant T ; si l'utilisateur modifie son ensemble plus tard, les observations passées en héritent silencieusement à l'affichage.

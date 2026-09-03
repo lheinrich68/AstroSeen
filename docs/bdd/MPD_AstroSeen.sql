@@ -132,7 +132,8 @@ CREATE TABLE visibilite_contenu (
 
 CREATE TABLE type_evenement_astro (
     id_type_evenement_astro  BIGSERIAL PRIMARY KEY,
-    libelle                  TEXT NOT NULL
+    libelle                  TEXT NOT NULL,
+    icone_vectorielle        TEXT -- icône propre à chaque type, identification visuelle rapide
 );
 
 CREATE TABLE niveau_importance_evenement (

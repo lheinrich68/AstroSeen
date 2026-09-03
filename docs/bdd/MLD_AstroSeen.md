@@ -102,7 +102,7 @@ EVENEMENT_ASTRO (id_evenement_astro, titre, description, date_debut, date_fin,
                   #id_type_evenement_astro, #id_niveau_importance_evenement,
                   #id_objet, #id_createur)
 
-TYPE_EVENEMENT_ASTRO (id_type_evenement_astro, libelle)
+TYPE_EVENEMENT_ASTRO (id_type_evenement_astro, libelle, icone_vectorielle)
 
 NIVEAU_IMPORTANCE_EVENEMENT (id_niveau_importance_evenement, libelle)
 ```
