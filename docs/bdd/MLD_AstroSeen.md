@@ -1,6 +1,7 @@
 # MLD // AstroSeen
 
-Modèle logique de données, dérivé du MEA/MCD (`modele-donnees-observations-ciel_v2.md`). Notation standard : clé primaire **soulignée** (représentée ici en gras), clé étrangère préfixée `#`.
+Modèle logique de données, dérivé du MEA/MCD (`modele-donnees-observations-ciel_v2.md`).
+Notation standard : clé primaire **soulignée** (représentée ici en gras), clé étrangère préfixée `#`.
 
 Aucun enum : chaque classification est une table de référence (id + libelle).
 
@@ -58,7 +59,7 @@ CARACTERISTIQUE_OBJET (id_caracteristique_objet, #id_objet, #id_type_caracterist
 TYPE_CARACTERISTIQUE (id_type_caracteristique, libelle, unite_par_defaut)
 
 NOTE (id_note, date_note, seeing_pickering, transparence, temperature, humidite, pression,
-      #id_meteo, evenements_imprevus, #id_statut_publication_note, ascension_droite, declinaison,
+      #id_meteo, evenements_imprevus, recit, #id_statut_publication_note, ascension_droite, declinaison,
       azimut, hauteur, heure_debut, heure_fin,
       #id_session, #id_redacteur, #id_lieu, #id_ensemble, #id_objet, #id_contenu,
       created_at, updated_at)

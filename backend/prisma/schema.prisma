@@ -284,6 +284,7 @@ model Note {
   meteoId Int?   @map("id_meteo")
 
   evenementImprevus String? @map("evenement_imprevus")
+  recit             String? // rédaction longue façon Notion (Markdown), rendu riche géré côté frontend
 
   statutPublication   Statut_Publication @relation(fields: [statutPublicationId], references: [id])
   statutPublicationId Int                @map("id_statut_publication")

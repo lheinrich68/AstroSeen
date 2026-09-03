@@ -113,8 +113,7 @@ VALUES
     ('Brumeux'),
     ('Pluie'),
     ('Vent fort'),
-    ('Orageux'),
-    ('Autre');
+    ('Orageux');
 
 CREATE TABLE source_croquis (
     id_source_croquis BIGSERIAL PRIMARY KEY,
@@ -154,7 +153,8 @@ VALUES
     ('Confirmé'),
     ('Expert');
 
-INSERT INTO role_plateforme (libelle) VALUES
+INSERT INTO role_plateforme (libelle)
+VALUES
     ('Membre'),
     ('Modérateur'),
     ('Administrateur');
@@ -202,11 +202,28 @@ VALUES
     ('Caméra'),
     ('Oculaire'),
     ('Filtre'),
-
     ('Réducteur de focale'),
     ('Barlow'),
     ('Autoguideur'),
     ('Trépied'),
+    ('Autre');
+
+INSERT INTO classification_astronomique (libelle)
+VALUES
+    ('Étoile'),
+    ('Étoile variable'),
+    ('Planète'),
+    ('Planète naine'),
+    ('Comète'),
+    ('Astéroïde'),
+    ('Galaxie'),
+    ('Nébuleuse'),
+    ('Amas ouvert'),
+    ('Amas globulaire'),
+    ('Étoile à neutrons'),
+    ('Supernova'),
+    ('Reste de supernova'),
+    ('Satellite'),
     ('Autre');
 
 INSERT INTO classification_astronomique (libelle)
@@ -493,6 +510,7 @@ CREATE TABLE note (
     pression                    DOUBLE PRECISION,
     id_meteo                    BIGINT REFERENCES meteo(id_meteo),
     evenements_imprevus         TEXT,
+    recit                       TEXT, -- rédaction longue façon Notion (Markdown), rendu riche géré côté frontend
     id_statut_publication_note  BIGINT NOT NULL REFERENCES statut_publication_note(id_statut_publication_note),
     ascension_droite            DOUBLE PRECISION,
     declinaison                 DOUBLE PRECISION,

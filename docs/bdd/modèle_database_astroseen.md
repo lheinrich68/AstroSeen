@@ -30,6 +30,8 @@ La v1 n'ayant jamais été mise en production, cette révision corrige aussi dir
 - `token_verification_email` (optionnel) — jeton envoyé par email, à usage unique
 - `date_expiration_token` (optionnel) — le lien de vérification n'est valable que temporairement
 - `date_verification_email` (optionnel) — renseigné une fois la vérification effectuée
+- `token_reinitialisation_mdp` (optionnel) — jeton distinct de celui de vérification email, envoyé pour réinitialiser le mot de passe. Séparé volontairement : partager le même jeton entre les deux flux invaliderait l'un en résolvant l'autre.
+- `date_expiration_token_reset` (optionnel) — le lien de réinitialisation n'est valable que temporairement, comme celui de vérification
 
 ### Toutes les classifications sont des tables de référence, pas des enums
 Décision transversale : **aucun type énuméré** (enum PostgreSQL/Prisma) dans tout le modèle — chaque classification (statut, type, visibilité, catégorie...) est une table de référence à part entière, avec un simple `id` + `libelle`. Plus simple à manipuler côté code (une jointure uniforme plutôt que deux façons différentes de gérer une valeur fixe), et une nouvelle valeur s'ajoute par une insertion de ligne, sans migration de schéma.
@@ -48,7 +50,7 @@ Décision transversale : **aucun type énuméré** (enum PostgreSQL/Prisma) dans
 | Statut participation | Participation | Invitée, Confirmée, Refusée |
 | Catégorie ensemble | Ensemble | Classique, Astrophoto |
 | Type matériel | Matériel | Télescope, Monture, Caméra, Oculaire, Filtre, Réducteur de focale, Barlow, Autoguideur, Trépied, Autre |
-| Classification astronomique | Objet | Étoile, Étoile variable, Planète, Planète naine, Comète, Astéroïde, DSO, Satellite, Autre |
+| Classification astronomique | Objet | Étoile, Étoile variable, Planète, Planète naine, Comète, Astéroïde, Galaxie, Nébuleuse, Amas ouvert, Amas globulaire, Étoile à neutrons, Supernova, Reste de supernova, Satellite, Autre |
 | Type caractéristique | Caractéristique objet | Magnitude apparente, Distance, Taille apparente, Constellation, Type spectral, Type morphologique, Période orbitale, Redshift, Vitesse radiale, Masse, Rayon, Température de surface, Ascension droite (catalogue), Déclinaison (catalogue), Autre |
 | Statut publication note | Note | Brouillon, Publiée |
 | Source croquis | Croquis | Importé, Dessiné |
@@ -115,6 +117,7 @@ Un même appareil physique (une caméra, un oculaire, une monture...) peut appar
 - `temperature`, `humidite`, `pression` (tous optionnels)
 - rattachée en optionnel à une `Météo` (table de référence, remplace l'ancien `conditions_libre`) — un menu de sélection plutôt qu'un texte libre, valeurs de départ : *Dégagé*, *Partiellement nuageux*, *Nuageux*, *Couvert*, *Brumeux*, *Pluie*, *Vent fort*, *Orageux*, *Autre*
 - `evenements_imprevus` (texte libre, optionnel) — pour tout ce qui ne rentre dans aucune case et n'est pas une caractéristique récurrente du lieu (déjà couverte par `Lieu.bortle`) : un incident ponctuel et local propre à cette session (ex. lampadaire allumé par erreur, phares de voiture traversant le champ de vision, animal dérangeant l'observation)
+- `recit` (texte riche, optionnel) — un espace de rédaction longue, façon Notion (titres, listes, mise en forme), une fois les conditions et caractéristiques renseignées. Distinct des champs structurés ci-dessus : ceux-là sont des données mesurables, `recit` est le récit libre de la soirée que l'observateur veut garder. Stocké en Markdown côté base — **spec complète, non bridée** : titres H1 à H6, tableaux, liens, images, citations, blocs de code, listes à puces/numérotées/cases à cocher, séparateurs. Pas de sous-ensemble limité choisi arbitrairement — tout ce que le format Markdown permet nativement reste disponible. Côté frontend, l'éditeur suit le pattern Notion : quelques raccourcis rapides (gras, italique) toujours visibles, et une commande "/" qui ouvre le menu complet des types de blocs plutôt qu'une barre d'outils qui esaierait de tout lister.
 - rattachée à un `Statut publication note` (table de référence : brouillon/publiée) — remplace l'ancien `statut_validation`. Le statut « validée par pair » disparaît avec le mécanisme de validation, désormais abandonné : l'astronome certifié est un simple badge de distinction, sans droit de validation.
 - `ascension_droite`, `declinaison` (float, degrés décimaux, tous deux optionnels) — position équatoriale de l'objet au moment de l'observation, pour les montures équatoriales
 - `azimut`, `hauteur` (float, degrés décimaux, tous deux optionnels) — position horizontale de l'objet, pour les montures alt-azimutales
@@ -123,7 +126,7 @@ Un même appareil physique (une caméra, un oculaire, une monture...) peut appar
 
 ### Objet du ciel (ex-Cible), renommage, désignations multiples et caractéristiques structurées
 Renommé de `Cible` à `Objet` — plus fidèle au vocabulaire courant (« objets du ciel profond ») ; `Cible` prêtait à confusion, l'idée de départ étant juste qu'il s'agit de l'objet visé par l'observation.
-- rattaché à une `Classification astronomique` (table de référence, ex-`Type objet` — renommé pour plus de précision : étoile/étoile variable/planète/planète naine/comète/astéroïde/DSO/satellite/autre)
+- rattaché à une `Classification astronomique` (table de référence, ex-`Type objet` — renommé pour plus de précision) — valeurs détaillées ci-dessous
   - `icone_vectorielle` (optionnel, sur la table de référence) — icône SVG générique de cette classification, affichée en secours quand le filtre « Images personnelles » d'un objet ne retourne aucune photo — évite de laisser croire à l'utilisateur qu'une image communautaire lui appartient
 
 **Désignation** (liée à Objet en 1-N)
@@ -146,7 +149,7 @@ Renommé de `Cible` à `Objet` — plus fidèle au vocabulaire courant (« objet
 
 Un objet peut ainsi porter autant de caractéristiques que pertinent pour son type, sans colonnes toujours vides pour les autres types.
 
-**Cas particulier : position catalogue pour les objets fixes.** `Ascension droite (catalogue)` et `Déclinaison (catalogue)` ne concernent que les objets dont la position dans le ciel est quasi invariable (DSO — galaxies, nébuleuses, amas), à la différence des `Note.ascension_droite`/`declinaison` qui capturent la position observée à un instant précis. Une planète comme Jupiter n'a jamais ces deux caractéristiques renseignées : sa position change de nuit en nuit, une valeur fixe serait fausse dès le lendemain.
+**Cas particulier : position catalogue pour les objets fixes.** `Ascension droite (catalogue)` et `Déclinaison (catalogue)` ne concernent que les objets dont la position dans le ciel est quasi invariable (galaxies, nébuleuses, amas...), à la différence des `Note.ascension_droite`/`declinaison` qui capturent la position observée à un instant précis. Une planète comme Jupiter n'a jamais ces deux caractéristiques renseignées : sa position change de nuit en nuit, une valeur fixe serait fausse dès le lendemain.
 
 ### Détails astrophoto : support multi-filtres
 Une acquisition LRGB ou en bande étroite utilise plusieurs filtres avec des temps de pose, un nombre de poses et un nombre de flats différents pour chacun (contrairement aux darks/bias, indépendants du filtre). La v1 ne pouvait décrire qu'une acquisition mono-filtre. On sort ces champs dans une sous-table :
@@ -224,8 +227,33 @@ Le calendrier combine deux sources bien distinctes, à ne pas mélanger dans une
 - créé par un `Utilisateur` — en pratique un `admin`, contrainte appliquée au niveau applicatif plutôt que par le schéma (pas de rôle dédié dans le modèle pour ça, `role_plateforme = admin` suffit)
 
 
-
 Organisation et Programme restent une bonne piste pour plus tard (campagnes coordonnées, matériel d'équipe), mais sont volontairement laissées hors du MVP tant que le besoin n'est pas confirmé par l'usage réel de la plateforme.
+
+### Signalement et modération de contenu (à implémenter plus tard, via une nouvelle migration)
+Conçu au moment des diagrammes UML (le cas d'utilisation « Modérer un contenu signalé » n'avait pas encore de support en base).
+
+**Signalement** (nouvelle entité)
+- rattaché à un `Contenu` (ce qui est signalé) et à un `Utilisateur` (qui signale)
+- rattaché à un `Motif signalement` (table de référence) — valeurs de départ : *Contenu inapproprié*, *Harcèlement*, *Spam*, *Désinformation*, *Contenu illégal*, *Autre*
+- `description` (texte libre, optionnel — précision du signalant)
+- `date_signalement`
+- rattaché à un `Statut signalement` (table de référence : *En attente* / *Traité*)
+- contrainte d'unicité (utilisateur, contenu) : une personne ne signale un même contenu qu'une fois, mais plusieurs personnes différentes peuvent signaler le même contenu — ce qui permet le comptage par contenu (nombre de signalements, motifs) affiché au modérateur
+
+**Visibilite_Contenu** — une 3ᵉ valeur s'ajoute : *Restreinte* (en plus de *Privée*/*Publique*), visible uniquement par le staff et l'auteur du contenu
+
+**Action_Moderation** (nouvelle entité) — trace ce que fait un modérateur **sur un contenu** (pas sur un signalement précis, puisqu'il examine l'ensemble des signalements reçus avant d'agir ; plusieurs actions possibles dans le temps sur un même contenu, ex. restreindre puis republier)
+- rattachée au `Contenu` concerné et à l'`Utilisateur` modérateur qui agit
+- rattachée à un `Type action moderation` (table de référence) — valeurs de départ : *Restreindre*, *Demander une modification*, *Valider et republier*, *Supprimer*
+- rattachée en optionnel à un `Motif signalement` (le motif structuré retenu par le staff, réutilise la même table — au choix du modérateur, structuré ou texte libre uniquement)
+- `message` (texte libre) — envoyé à l'auteur : demande de modification détaillée, ou motif de suppression constaté
+- `date_action`
+
+**Flux "masquer" en deux temps** : *Restreindre* (le modérateur agit, `Contenu.visibilite` passe à *Restreinte*) → l'auteur modifie son contenu → un modérateur (pas forcément le même) *Valide et republie*, `Contenu.visibilite` repasse à *Publique*. C'est pour ça que `Action_Moderation` est une entité à part avec historique, plutôt qu'un simple champ sur `Signalement`.
+
+**Points à trancher au moment de l'implémentation** :
+- Notification de l'auteur (email, notification in-app) — pas encore modélisée, à définir avec le reste du système de notifications s'il existe.
+- Un signalement "En attente" doit-il bloquer la republication automatique, ou est-ce le modérateur qui décide au cas par cas ?
 
 ## Schéma relationnel mis à jour
 
@@ -302,6 +330,8 @@ erDiagram
     string token_verification_email
     datetime date_expiration_token
     datetime date_verification_email
+    string token_reinitialisation_mdp
+    datetime date_expiration_token_reset
     datetime created_at
     datetime updated_at
   }
@@ -370,6 +400,7 @@ erDiagram
     float humidite
     float pression
     string evenements_imprevus
+    string recit
     float ascension_droite
     float declinaison
     float azimut
