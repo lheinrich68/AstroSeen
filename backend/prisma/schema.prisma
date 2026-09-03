@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -10,6 +5,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  // Pas d'url ici en Prisma 7 : déplacée dans prisma.config.mjs (CLI/migrations)
+  // et fournie via un adaptateur de driver au PrismaClient (src/config/db.js).
 }
 
 // =====================================================================================================================
@@ -99,7 +96,7 @@ model Classification_Astronomique {
   id               Int     @id @default(autoincrement()) @map("id_classification_astronomique")
   libelle          String
   iconeVectorielle String? @map("icone_vectorielle") // icône SVG générique, fallback si filtre "mes photos" vide
-  objects          Objet[]
+  objets           Objet[]
 
   @@map("classification_astronomique")
 }
@@ -200,8 +197,8 @@ model User {
   dateDerniereConnexion DateTime? @map("date_derniere_connexion")
 
   // BANNI/SUPPRIME : le contenu (sessions, notes, photos, commentaires...)
-  // reste lié à cette même ligne. C'est cet état qui fait afficher
-  // "user anonyme" à la lecture, pas une réassignation de FK.
+  // reste lié à cette même ligne — c'est cet état qui fait afficher
+  // "Utilisateur anonyme" à la lecture, pas une réassignation de FK.
   // SUPPRIME va plus loin : email/motDePasseHash/nomAffiche/bio/pseudo sont
   // réellement écrasés (-> droit à l'effacement RGPD).
   etatCompte   Etat_Compte @relation(fields: [etatCompteId], references: [id])
@@ -214,6 +211,11 @@ model User {
   tokenVerifEmail     String?   @map("token_verif_email")
   dateExpirationToken DateTime? @map("date_expiration_token")
   dateVerifEmail      DateTime? @map("date_verif_email")
+
+  // Distinct du token de vérification email, volontairement — partager le
+  // même jeton entre les deux flux invaliderait l'un en résolvant l'autre.
+  tokenReinitialisationMdp String?   @map("token_reinitialisation_mdp")
+  dateExpirationTokenReset DateTime? @map("date_expiration_token_reset")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

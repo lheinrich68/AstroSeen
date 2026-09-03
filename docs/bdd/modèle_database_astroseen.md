@@ -1,24 +1,26 @@
-# Modèle de données // AstroSeen
+# Modèle de données — Application d'observations du ciel nocturne (v2)
 
 ## Contexte de cette révision
 
+La v1 du modèle visait un public homogène (amateurs partageant des sorties). Le public cible s'élargit désormais à quatre profils qui cohabitent sur la même plateforme : passionnés, astrophotographes, experts et professionnels (chercheurs, personnel d'observatoire, etc.).
+
 Deux axes orthogonaux distinguent ces profils, et il ne faut pas les confondre dans le modèle :
-- **le rapport à l'astronomie** (loisir ou métier) : n'implique aucun droit particulier dans l'app ;
-- **les permissions dans l'application** (membre, modérateur, admin, astronome certifié) : indépendantes du niveau d'expertise déclaré.
+- **le rapport à l'astronomie** (loisir ou métier) — n'implique aucun droit particulier dans l'app ;
+- **les permissions dans l'application** (membre, modérateur, admin, astronome certifié) — indépendantes du niveau d'expertise déclaré.
 
 La v1 n'ayant jamais été mise en production, cette révision corrige aussi directement quelques incohérences structurelles relevées lors de la relecture, sans contrainte de migration.
 
 ## Modifications sur les entités existantes
 
-### Utilisateur - étendu
+### Utilisateur — étendu
 - `pseudo`
-- `email` : **absent par erreur des versions précédentes du modèle**, alors que c'est le champ d'identification de base pour l'authentification JWT
+- `email` — **absent par erreur des versions précédentes du modèle**, alors que c'est le champ d'identification de base pour l'authentification JWT
 - `mot_de_passe_hash` (jamais stocké en clair — hachage bcrypt ou argon2)
 - `nom_affiche` (optionnel — nom réel, utile pour les pros qui veulent être identifiables)
 - `bio` (optionnel)
-- rattaché à un `Statut utilisateur` (table de référence (voir ci-dessous))
-- rattaché à un `Niveau d'expérience` (table de référence (voir ci-dessous))
-- rattaché à un `Rôle plateforme` (table de référence (voir ci-dessous))
+- rattaché à un `Statut utilisateur` (table de référence — voir ci-dessous)
+- rattaché à un `Niveau d'expérience` (table de référence — voir ci-dessous)
+- rattaché à un `Rôle plateforme` (table de référence — voir ci-dessous)
 - `astronome_certifie` (bool) — badge de distinction accordé par un administrateur, sans droit particulier associé (ni validation de contenu, ni permission supplémentaire) : il sert uniquement à distinguer visiblement ces profils des autres utilisateurs.
 - `certifie_par` (optionnel — référence vers l'utilisateur admin ayant accordé le statut)
 - `date_certification` (optionnel)
@@ -32,6 +34,7 @@ La v1 n'ayant jamais été mise en production, cette révision corrige aussi dir
 - `date_verification_email` (optionnel) — renseigné une fois la vérification effectuée
 - `token_reinitialisation_mdp` (optionnel) — jeton distinct de celui de vérification email, envoyé pour réinitialiser le mot de passe. Séparé volontairement : partager le même jeton entre les deux flux invaliderait l'un en résolvant l'autre.
 - `date_expiration_token_reset` (optionnel) — le lien de réinitialisation n'est valable que temporairement, comme celui de vérification
+- `date_demande_suppression` (optionnel) — renseignée quand l'utilisateur demande la suppression de son compte (droit à l'effacement RGPD), tant que `etat_compte` reste encore `actif`. Un admin doit traiter la demande pour que `etat_compte` bascule à `supprimé` — sans ce champ, impossible de constituer une file d'attente des demandes en cours.
 
 ### Toutes les classifications sont des tables de référence, pas des enums
 Décision transversale : **aucun type énuméré** (enum PostgreSQL/Prisma) dans tout le modèle — chaque classification (statut, type, visibilité, catégorie...) est une table de référence à part entière, avec un simple `id` + `libelle`. Plus simple à manipuler côté code (une jointure uniforme plutôt que deux façons différentes de gérer une valeur fixe), et une nouvelle valeur s'ajoute par une insertion de ligne, sans migration de schéma.
@@ -59,7 +62,7 @@ Décision transversale : **aucun type énuméré** (enum PostgreSQL/Prisma) dans
 | Type événement astro | Événement astronomique | Éclipse, Pluie de météores, Opposition, Conjonction, Transit, Occultation, Autre |
 | Niveau importance événement | Événement astronomique | Majeur, Mineur |
 
-### Compte banni ou supprimé => anonymisation plutôt que suppression en cascade
+### Compte banni ou supprimé — anonymisation plutôt que suppression en cascade
 Résout le point resté ouvert en section 9.3 du cahier des charges. Plutôt que de supprimer ou réassigner les notes/photos/sessions/commentaires d'un utilisateur banni ou supprimé (ce qui casserait l'historique des autres participants et forcerait à toucher sept tables différentes qui référencent `Utilisateur`), le contenu **reste lié à la même ligne `Utilisateur`** — c'est l'état de ce compte qui change, et l'affichage « Utilisateur anonyme » est dérivé de cet état à la lecture, pas stocké nulle part ailleurs.
 
 - `Etat compte` : *actif* / *banni* / *supprimé*
@@ -90,7 +93,7 @@ Le champ `type` de `Matériel` recouvre des choses trop diverses (télescope, mo
 **Type_Materiel** (nouvelle)
 - `libelle` — valeurs de départ : *Télescope*, *Monture*, *Caméra*, *Oculaire*, *Filtre*, *Réducteur de focale*, *Barlow*, *Autoguideur*, *Trépied*, *Autre*
 
-### Ensemble / Matériel => relation N-N, catalogue partagé et suppression conditionnelle
+### Ensemble / Matériel — relation N-N, catalogue partagé et suppression conditionnelle
 Un même appareil physique (une caméra, un oculaire, une monture...) peut appartenir à **plusieurs** `Ensemble` — par exemple une caméra utilisée à la fois dans un setup « visuel club » et un setup « astrophoto Ha/OIII/SII ». La relation `Ensemble`–`Matériel` passe donc de 1-N à **N-N**, via une table de jointure :
 
 **Ensemble_Materiel** (nouvelle, jointure N-N)
@@ -101,7 +104,7 @@ Un même appareil physique (une caméra, un oculaire, une monture...) peut appar
 - **Dédoublonnage** : contrainte d'unicité sur (`type`, `marque`, `modèle`) — le `type` étant désormais une référence vers `Type_Materiel` plutôt qu'un texte libre — si un modèle de télescope existe déjà en base, une nouvelle personne qui l'ajoute est reliée à la fiche existante plutôt que d'en créer une copie. Ça implique une recherche/autocomplétion côté saisie (« ce modèle existe déjà, voulez-vous le réutiliser ? ») plutôt qu'un simple formulaire libre. Un matériel sans marque/modèle renseigné (générique, sans info suffisante pour matcher) reste dédupliqué au cas par cas, sans forcer de fusion hasardeuse.
 - **Suppression conditionnelle** : retirer un matériel de sa propre liste ne fait que supprimer le lien `Ensemble_Materiel` correspondant — la fiche `Matériel` elle-même n'est supprimée de la base que si **plus aucun** `Ensemble_Materiel` ne la référence. Cette règle est implémentée par un trigger côté base (voir `mpd_astroseen.sql`), pas seulement côté application, pour garantir qu'elle s'applique quel que soit le chemin de suppression emprunté.
 
-### Note : conditions structurées et correction de cardinalité
+### Note — conditions structurées et correction de cardinalité
 - `date_note` (date, obligatoire) — la nuit précise à laquelle porte cette note. Pré-remplie automatiquement depuis `Session.date_debut` à la création, mais modifiable : une session peut s'étaler sur plusieurs nuits, une note doit pouvoir préciser sur laquelle elle porte, indépendamment de l'heure exacte (`heure_debut`/`heure_fin`, toujours optionnelles ci-dessous).
 - `seeing_pickering` (int, 1 à 10) — **seule échelle stockée en base**, la plus précise des deux. L'échelle d'Antoniadi (I à V, avec le libellé qualité *Parfaite / Très bonne / Moyenne / Mauvaise / Très mauvaise*) est dérivée à l'affichage par une table de correspondance fixe côté application (pas une table en base, puisque c'est une conversion figée, pas une donnée) :
 
@@ -151,7 +154,7 @@ Un objet peut ainsi porter autant de caractéristiques que pertinent pour son ty
 
 **Cas particulier : position catalogue pour les objets fixes.** `Ascension droite (catalogue)` et `Déclinaison (catalogue)` ne concernent que les objets dont la position dans le ciel est quasi invariable (galaxies, nébuleuses, amas...), à la différence des `Note.ascension_droite`/`declinaison` qui capturent la position observée à un instant précis. Une planète comme Jupiter n'a jamais ces deux caractéristiques renseignées : sa position change de nuit en nuit, une valeur fixe serait fausse dès le lendemain.
 
-### Détails astrophoto : support multi-filtres
+### Détails astrophoto — support multi-filtres
 Une acquisition LRGB ou en bande étroite utilise plusieurs filtres avec des temps de pose, un nombre de poses et un nombre de flats différents pour chacun (contrairement aux darks/bias, indépendants du filtre). La v1 ne pouvait décrire qu'une acquisition mono-filtre. On sort ces champs dans une sous-table :
 
 **Détails astrophoto** (allégée)
@@ -201,7 +204,7 @@ Plutôt que de dupliquer trois fois (Session, Note, Photo) les mêmes mécanique
 
 **Croquis** : pas de ligne `Contenu` propre — un croquis suit la visibilité de la `Note` à laquelle il est rattaché, il n'est jamais publié indépendamment.
 
-### Objet : planétarium (catalogue consultable)
+### Objet — planétarium (catalogue consultable)
 Pour servir de page « fiche objet » consultable librement (façon Pokédex), `Objet` porte :
 - `nom` (nom usuel affiché, ex. *Lune*, *Nébuleuse d'Orion* — distinct des codes de catalogue portés par `Désignation`)
 - `description` (texte — présentation générale, courte)
@@ -212,7 +215,7 @@ Pour servir de page « fiche objet » consultable librement (façon Pokédex), `
 La page « fiche objet » du planétarium affiche les `Photo` où `objet = cet objet` et `Contenu.visibilite = publique`, avec un filtre **Images personnelles / Images communautaires** qui ne fait que distinguer, à l'affichage, les photos dont l'auteur est l'utilisateur connecté de celles publiées par les autres — aucune structure supplémentaire n'est nécessaire, c'est une simple requête filtrée sur les relations déjà existantes (`Photo.publie_par` + `Contenu.visibilite`).
 
 
-### Calendrier : événements astronomiques (nouvelle entité)
+### Calendrier — événements astronomiques (nouvelle entité)
 Le calendrier combine deux sources bien distinctes, à ne pas mélanger dans une seule table :
 - les **sessions de l'utilisateur** (créées par lui, ou auxquelles il a une `Participation` acceptée) — déjà entièrement modélisées via `Session`/`Participation`, aucune nouvelle structure nécessaire, c'est une simple requête combinée à l'affichage ;
 - les **événements astronomiques** (éclipses, pluies de météores, oppositions planétaires...), qui n'existent pas encore et sont gérés par un administrateur plutôt que par les utilisateurs.
@@ -227,10 +230,13 @@ Le calendrier combine deux sources bien distinctes, à ne pas mélanger dans une
 - créé par un `Utilisateur` — en pratique un `admin`, contrainte appliquée au niveau applicatif plutôt que par le schéma (pas de rôle dédié dans le modèle pour ça, `role_plateforme = admin` suffit)
 
 
+
+## Extensions optionnelles — reportées
+
 Organisation et Programme restent une bonne piste pour plus tard (campagnes coordonnées, matériel d'équipe), mais sont volontairement laissées hors du MVP tant que le besoin n'est pas confirmé par l'usage réel de la plateforme.
 
 ### Signalement et modération de contenu (à implémenter plus tard, via une nouvelle migration)
-Conçu au moment des diagrammes UML (le cas d'utilisation « Modérer un contenu signalé » n'avait pas encore de support en base).
+Conçu au moment des diagrammes UML (le cas d'utilisation « Modérer un contenu signalé » n'avait pas encore de support en base). Développement volontairement reporté à la phase modération — documenté ici pour ne pas perdre la conception.
 
 **Signalement** (nouvelle entité)
 - rattaché à un `Contenu` (ce qui est signalé) et à un `Utilisateur` (qui signale)
@@ -332,6 +338,7 @@ erDiagram
     datetime date_verification_email
     string token_reinitialisation_mdp
     datetime date_expiration_token_reset
+    datetime date_demande_suppression
     datetime created_at
     datetime updated_at
   }

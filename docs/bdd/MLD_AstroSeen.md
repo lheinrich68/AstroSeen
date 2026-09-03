@@ -12,6 +12,8 @@ UTILISATEUR (id_utilisateur, pseudo, email, mot_de_passe_hash, nom_affiche, bio,
              consentement_cgu_date, date_derniere_connexion, #id_etat_compte,
              photo_profil, email_verifie, token_verification_email,
              date_expiration_token, date_verification_email,
+             token_reinitialisation_mdp, date_expiration_token_reset,
+             date_demande_suppression,
              created_at, updated_at)
 
 STATUT_UTILISATEUR (id_statut_utilisateur, libelle)

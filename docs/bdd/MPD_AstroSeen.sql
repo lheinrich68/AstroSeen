@@ -29,79 +29,79 @@ $$ LANGUAGE plpgsql;
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE statut_utilisateur (
-    id_statut_utilisateur BIGSERIAL PRIMARY KEY,
-    libelle               TEXT NOT NULL
+    id_statut_utilisateur  BIGSERIAL PRIMARY KEY,
+    libelle                TEXT NOT NULL
 );
 
 CREATE TABLE niveau_experience (
-    id_niveau_experience BIGSERIAL PRIMARY KEY,
-    libelle              TEXT NOT NULL
-);
-
-CREATE TABLE role_plateforme (
-    id_role_plateforme BIGSERIAL PRIMARY KEY,
-    libelle            TEXT NOT NULL
-);
-
-CREATE TABLE etat_compte (
-    id_etat_compte BIGSERIAL PRIMARY KEY,
-    libelle        TEXT NOT NULL
-);
-
-CREATE TABLE visibilite_participation (
-    id_visibilite_participation BIGSERIAL PRIMARY KEY,
-    libelle                     TEXT NOT NULL
-);
-
-CREATE TABLE type_session (
-    id_type_session BIGSERIAL PRIMARY KEY,
-    libelle         TEXT NOT NULL
-);
-
-CREATE TABLE statut_session (
-    id_statut_session BIGSERIAL PRIMARY KEY,
-    libelle           TEXT NOT NULL
-);
-
-CREATE TABLE statut_participation (
-    id_statut_participation BIGSERIAL PRIMARY KEY,
-    libelle                 TEXT NOT NULL
-);
-
-CREATE TABLE categorie_ensemble (
-    id_categorie_ensemble BIGSERIAL PRIMARY KEY,
+    id_niveau_experience  BIGSERIAL PRIMARY KEY,
     libelle               TEXT NOT NULL
 );
 
-CREATE TABLE type_materiel (
-    id_type_materiel BIGSERIAL PRIMARY KEY,
+CREATE TABLE role_plateforme (
+    id_role_plateforme  BIGSERIAL PRIMARY KEY,
+    libelle             TEXT NOT NULL
+);
+
+CREATE TABLE etat_compte (
+    id_etat_compte  BIGSERIAL PRIMARY KEY,
+    libelle         TEXT NOT NULL
+);
+
+CREATE TABLE visibilite_participation (
+    id_visibilite_participation  BIGSERIAL PRIMARY KEY,
+    libelle                      TEXT NOT NULL
+);
+
+CREATE TABLE type_session (
+    id_type_session  BIGSERIAL PRIMARY KEY,
     libelle          TEXT NOT NULL
+);
+
+CREATE TABLE statut_session (
+    id_statut_session  BIGSERIAL PRIMARY KEY,
+    libelle            TEXT NOT NULL
+);
+
+CREATE TABLE statut_participation (
+    id_statut_participation  BIGSERIAL PRIMARY KEY,
+    libelle                  TEXT NOT NULL
+);
+
+CREATE TABLE categorie_ensemble (
+    id_categorie_ensemble  BIGSERIAL PRIMARY KEY,
+    libelle                TEXT NOT NULL
+);
+
+CREATE TABLE type_materiel (
+    id_type_materiel  BIGSERIAL PRIMARY KEY,
+    libelle           TEXT NOT NULL
 );
 
 -- Classification d'un objet du ciel (ex-"type_objet") : renommé pour plus de
 -- précision astronomique.
 CREATE TABLE classification_astronomique (
-    id_classification_astronomique BIGSERIAL PRIMARY KEY,
-    libelle                        TEXT NOT NULL,
-    icone_vectorielle              TEXT -- icône SVG générique (fallback quand le filtre "Mes photos" est vide)
+    id_classification_astronomique  BIGSERIAL PRIMARY KEY,
+    libelle                         TEXT NOT NULL,
+    icone_vectorielle               TEXT -- icône SVG générique (fallback quand le filtre "Mes photos" est vide)
 );
 
 -- Nom d'une caractéristique observable/cataloguée d'un objet (magnitude,
 -- distance, type spectral...) -> table de référence, pas de texte libre.
 CREATE TABLE type_caracteristique (
-    id_type_caracteristique BIGSERIAL PRIMARY KEY,
-    libelle                 TEXT NOT NULL,
-    unite_par_defaut        TEXT -- ex: "mag", "al", "arcmin" -> indicative, peut être surchargée par ligne
+    id_type_caracteristique  BIGSERIAL PRIMARY KEY,
+    libelle                  TEXT NOT NULL,
+    unite_par_defaut         TEXT -- ex: "mag", "al", "arcmin" -> indicative, peut être surchargée par ligne
 );
 
 CREATE TABLE statut_publication_note (
-    id_statut_publication_note BIGSERIAL PRIMARY KEY,
-    libelle                    TEXT NOT NULL
+    id_statut_publication_note  BIGSERIAL PRIMARY KEY,
+    libelle                     TEXT NOT NULL
 );
 
 CREATE TABLE meteo (
-    id_meteo BIGSERIAL PRIMARY KEY,
-    libelle  TEXT NOT NULL
+    id_meteo  BIGSERIAL PRIMARY KEY,
+    libelle   TEXT NOT NULL
 );
 
 INSERT INTO meteo (libelle)
@@ -121,23 +121,23 @@ CREATE TABLE source_croquis (
 );
 
 CREATE TABLE type_contenu (
-    id_type_contenu BIGSERIAL PRIMARY KEY,
-    libelle         TEXT NOT NULL
+    id_type_contenu  BIGSERIAL PRIMARY KEY,
+    libelle          TEXT NOT NULL
 );
 
 CREATE TABLE visibilite_contenu (
-    id_visibilite_contenu BIGSERIAL PRIMARY KEY,
-    libelle               TEXT NOT NULL
+    id_visibilite_contenu  BIGSERIAL PRIMARY KEY,
+    libelle                TEXT NOT NULL
 );
 
 CREATE TABLE type_evenement_astro (
-    id_type_evenement_astro BIGSERIAL PRIMARY KEY,
-    libelle                 TEXT NOT NULL
+    id_type_evenement_astro  BIGSERIAL PRIMARY KEY,
+    libelle                  TEXT NOT NULL
 );
 
 CREATE TABLE niveau_importance_evenement (
-    id_niveau_importance_evenement BIGSERIAL PRIMARY KEY,
-    libelle                        TEXT NOT NULL
+    id_niveau_importance_evenement  BIGSERIAL PRIMARY KEY,
+    libelle                         TEXT NOT NULL
 );
 
 -- Données de départ
@@ -297,28 +297,31 @@ VALUES
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE utilisateur (
-    id_utilisateur           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    pseudo                   TEXT NOT NULL UNIQUE,
-    email                    TEXT NOT NULL UNIQUE,
-    mot_de_passe_hash        TEXT NOT NULL,
-    nom_affiche              TEXT,
-    bio                      TEXT,
-    id_statut_utilisateur    BIGINT NOT NULL REFERENCES statut_utilisateur(id_statut_utilisateur),
-    id_niveau_experience     BIGINT NOT NULL REFERENCES niveau_experience(id_niveau_experience),
-    id_role_plateforme       BIGINT NOT NULL REFERENCES role_plateforme(id_role_plateforme),
-    astronome_certifie       BOOLEAN NOT NULL DEFAULT FALSE,
-    id_certificateur         UUID REFERENCES utilisateur(id_utilisateur),
-    date_certification       TIMESTAMPTZ,
-    consentement_cgu_date    TIMESTAMPTZ,
-    date_derniere_connexion  TIMESTAMPTZ,
-    id_etat_compte           BIGINT NOT NULL REFERENCES etat_compte(id_etat_compte),
-    photo_profil             TEXT,
-    email_verifie            BOOLEAN NOT NULL DEFAULT FALSE,
-    token_verification_email TEXT,
-    date_expiration_token    TIMESTAMPTZ,
-    date_verification_email  TIMESTAMPTZ,
-    created_at               TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at               TIMESTAMPTZ NOT NULL DEFAULT now()
+    id_utilisateur               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    pseudo                       TEXT NOT NULL UNIQUE,
+    email                        TEXT NOT NULL UNIQUE,
+    mot_de_passe_hash            TEXT NOT NULL,
+    nom_affiche                  TEXT,
+    bio                          TEXT,
+    id_statut_utilisateur        BIGINT NOT NULL REFERENCES statut_utilisateur(id_statut_utilisateur),
+    id_niveau_experience         BIGINT NOT NULL REFERENCES niveau_experience(id_niveau_experience),
+    id_role_plateforme           BIGINT NOT NULL REFERENCES role_plateforme(id_role_plateforme),
+    astronome_certifie           BOOLEAN NOT NULL DEFAULT FALSE,
+    id_certificateur             UUID REFERENCES utilisateur(id_utilisateur),
+    date_certification           TIMESTAMPTZ,
+    consentement_cgu_date        TIMESTAMPTZ,
+    date_derniere_connexion      TIMESTAMPTZ,
+    id_etat_compte               BIGINT NOT NULL REFERENCES etat_compte(id_etat_compte),
+    photo_profil                 TEXT,
+    email_verifie                BOOLEAN NOT NULL DEFAULT FALSE,
+    token_verification_email     TEXT,
+    date_expiration_token        TIMESTAMPTZ,
+    date_verification_email      TIMESTAMPTZ,
+    token_reinitialisation_mdp   TEXT, -- distinct du token de vérification email, volontairement
+    date_expiration_token_reset  TIMESTAMPTZ,
+    date_demande_suppression     TIMESTAMPTZ, -- file d'attente admin : renseignée tant que etat_compte reste 'actif'
+    created_at                   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at                   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE INDEX idx_utilisateur_statut ON utilisateur(id_statut_utilisateur);
@@ -350,12 +353,12 @@ CREATE INDEX idx_contenu_visibilite ON contenu(id_visibilite_contenu);
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE lieu (
-    id_lieu         BIGSERIAL PRIMARY KEY,
-    nom             TEXT NOT NULL,
-    latitude        DOUBLE PRECISION NOT NULL,
-    longitude       DOUBLE PRECISION NOT NULL,
-    bortle          INTEGER,
-    id_proprietaire UUID NOT NULL REFERENCES utilisateur(id_utilisateur)
+    id_lieu          BIGSERIAL PRIMARY KEY,
+    nom              TEXT NOT NULL,
+    latitude         DOUBLE PRECISION NOT NULL,
+    longitude        DOUBLE PRECISION NOT NULL,
+    bortle           INTEGER,
+    id_proprietaire  UUID NOT NULL REFERENCES utilisateur(id_utilisateur)
 );
 
 CREATE INDEX idx_lieu_proprietaire ON lieu(id_proprietaire);
@@ -406,21 +409,21 @@ CREATE TABLE participation (
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE ensemble (
-    id_ensemble           BIGSERIAL PRIMARY KEY,
-    nom                   TEXT NOT NULL,
-    id_categorie_ensemble BIGINT NOT NULL REFERENCES categorie_ensemble(id_categorie_ensemble),
-    id_proprietaire       UUID NOT NULL REFERENCES utilisateur(id_utilisateur)
+    id_ensemble            BIGSERIAL PRIMARY KEY,
+    nom                    TEXT NOT NULL,
+    id_categorie_ensemble  BIGINT NOT NULL REFERENCES categorie_ensemble(id_categorie_ensemble),
+    id_proprietaire        UUID NOT NULL REFERENCES utilisateur(id_utilisateur)
 );
 
 CREATE INDEX idx_ensemble_proprietaire ON ensemble(id_proprietaire);
 CREATE INDEX idx_ensemble_categorie ON ensemble(id_categorie_ensemble);
 
 CREATE TABLE materiel (
-    id_materiel      BIGSERIAL PRIMARY KEY,
-    id_type_materiel BIGINT NOT NULL REFERENCES type_materiel(id_type_materiel),
-    marque           TEXT,
-    modele           TEXT,
-    caracteristiques TEXT,
+    id_materiel       BIGSERIAL PRIMARY KEY,
+    id_type_materiel  BIGINT NOT NULL REFERENCES type_materiel(id_type_materiel),
+    marque            TEXT,
+    modele            TEXT,
+    caracteristiques  TEXT,
 
     UNIQUE (id_type_materiel, marque, modele)
 );
@@ -428,9 +431,9 @@ CREATE TABLE materiel (
 CREATE INDEX idx_materiel_type ON materiel(id_type_materiel);
 
 CREATE TABLE ensemble_materiel (
-    id_ensemble_materiel BIGSERIAL PRIMARY KEY,
-    id_ensemble          BIGINT NOT NULL REFERENCES ensemble(id_ensemble),
-    id_materiel          BIGINT NOT NULL REFERENCES materiel(id_materiel),
+    id_ensemble_materiel  BIGSERIAL PRIMARY KEY,
+    id_ensemble           BIGINT NOT NULL REFERENCES ensemble(id_ensemble),
+    id_materiel           BIGINT NOT NULL REFERENCES materiel(id_materiel),
 
     UNIQUE (id_ensemble, id_materiel)
 );
@@ -471,10 +474,10 @@ CREATE TABLE objet (
 CREATE INDEX idx_objet_classification ON objet(id_classification_astronomique);
 
 CREATE TABLE designation (
-    id_designation BIGSERIAL PRIMARY KEY,
-    catalogue      TEXT NOT NULL,
-    code           TEXT NOT NULL,
-    id_objet       UUID NOT NULL REFERENCES objet(id_objet),
+    id_designation  BIGSERIAL PRIMARY KEY,
+    catalogue       TEXT NOT NULL,
+    code            TEXT NOT NULL,
+    id_objet        UUID NOT NULL REFERENCES objet(id_objet),
 
     UNIQUE (catalogue, code)
 );
@@ -485,11 +488,11 @@ CREATE INDEX idx_designation_objet ON designation(id_objet);
 -- par caractéristique, nombre illimité et variable selon le type d'objet
 -- (une planète et une galaxie n'ont pas les mêmes caractéristiques pertinentes).
 CREATE TABLE caracteristique_objet (
-    id_caracteristique_objet BIGSERIAL PRIMARY KEY,
-    id_objet                 UUID NOT NULL REFERENCES objet(id_objet),
-    id_type_caracteristique  BIGINT NOT NULL REFERENCES type_caracteristique(id_type_caracteristique),
-    valeur                   TEXT NOT NULL,
-    unite                    TEXT, -- surcharge unite_par_defaut si besoin (ex: valeur en parsecs plutôt qu'années-lumière)
+    id_caracteristique_objet  BIGSERIAL PRIMARY KEY,
+    id_objet                  UUID NOT NULL REFERENCES objet(id_objet),
+    id_type_caracteristique   BIGINT NOT NULL REFERENCES type_caracteristique(id_type_caracteristique),
+    valeur                    TEXT NOT NULL,
+    unite                     TEXT, -- surcharge unite_par_defaut si besoin (ex: valeur en parsecs plutôt qu'années-lumière)
 
     UNIQUE (id_objet, id_type_caracteristique)
 );
@@ -539,11 +542,11 @@ CREATE TRIGGER trg_note_updated_at
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 CREATE TABLE croquis (
-    id_croquis        BIGSERIAL PRIMARY KEY,
-    image             TEXT NOT NULL,
-    id_source_croquis BIGINT NOT NULL REFERENCES source_croquis(id_source_croquis),
-    date_creation     TIMESTAMPTZ NOT NULL DEFAULT now(),
-    id_note           UUID NOT NULL REFERENCES note(id_note)
+    id_croquis         BIGSERIAL PRIMARY KEY,
+    image              TEXT NOT NULL,
+    id_source_croquis  BIGINT NOT NULL REFERENCES source_croquis(id_source_croquis),
+    date_creation      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    id_note            UUID NOT NULL REFERENCES note(id_note)
 );
 
 CREATE INDEX idx_croquis_note ON croquis(id_note);
@@ -553,16 +556,16 @@ CREATE INDEX idx_croquis_note ON croquis(id_note);
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE photo (
-    id_photo       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    date_prise     TIMESTAMPTZ,
-    id_session     UUID REFERENCES session(id_session),
-    id_note        UUID REFERENCES note(id_note),
-    id_ensemble    BIGINT REFERENCES ensemble(id_ensemble),
-    id_objet       UUID REFERENCES objet(id_objet),
-    id_publicateur UUID NOT NULL REFERENCES utilisateur(id_utilisateur),
-    id_contenu     BIGINT NOT NULL UNIQUE REFERENCES contenu(id_contenu),
-    created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+    id_photo        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    date_prise      TIMESTAMPTZ,
+    id_session      UUID REFERENCES session(id_session),
+    id_note         UUID REFERENCES note(id_note),
+    id_ensemble     BIGINT REFERENCES ensemble(id_ensemble),
+    id_objet        UUID REFERENCES objet(id_objet),
+    id_publicateur  UUID NOT NULL REFERENCES utilisateur(id_utilisateur),
+    id_contenu      BIGINT NOT NULL UNIQUE REFERENCES contenu(id_contenu),
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE INDEX idx_photo_session ON photo(id_session);
@@ -574,25 +577,25 @@ CREATE TRIGGER trg_photo_updated_at
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 CREATE TABLE details_astrophoto (
-    id_details_astrophoto BIGSERIAL PRIMARY KEY,
-    gain_iso              TEXT,
-    ouverture             DOUBLE PRECISION,
-    focale_effective      DOUBLE PRECISION,
-    nombre_darks          INTEGER,
-    nombre_bias           INTEGER,
-    logiciel_acquisition  TEXT,
-    logiciel_traitement   TEXT,
-    methode_empilement    TEXT,
-    id_photo              UUID NOT NULL UNIQUE REFERENCES photo(id_photo)
+    id_details_astrophoto  BIGSERIAL PRIMARY KEY,
+    gain_iso               TEXT,
+    ouverture              DOUBLE PRECISION,
+    focale_effective       DOUBLE PRECISION,
+    nombre_darks           INTEGER,
+    nombre_bias            INTEGER,
+    logiciel_acquisition   TEXT,
+    logiciel_traitement    TEXT,
+    methode_empilement     TEXT,
+    id_photo               UUID NOT NULL UNIQUE REFERENCES photo(id_photo)
 );
 
 CREATE TABLE acquisition_filtre (
-    id_acquisition_filtre BIGSERIAL PRIMARY KEY,
-    filtre                TEXT NOT NULL,
-    temps_pose            DOUBLE PRECISION,
-    nombre_poses          INTEGER,
-    nombre_flats          INTEGER,
-    id_details_astrophoto BIGINT NOT NULL REFERENCES details_astrophoto(id_details_astrophoto)
+    id_acquisition_filtre  BIGSERIAL PRIMARY KEY,
+    filtre                 TEXT NOT NULL,
+    temps_pose             DOUBLE PRECISION,
+    nombre_poses           INTEGER,
+    nombre_flats           INTEGER,
+    id_details_astrophoto  BIGINT NOT NULL REFERENCES details_astrophoto(id_details_astrophoto)
 );
 
 CREATE INDEX idx_acquisition_filtre_details ON acquisition_filtre(id_details_astrophoto);
@@ -602,33 +605,33 @@ CREATE INDEX idx_acquisition_filtre_details ON acquisition_filtre(id_details_ast
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE commentaire (
-    id_commentaire BIGSERIAL PRIMARY KEY,
-    texte          TEXT NOT NULL,
-    date           TIMESTAMPTZ NOT NULL DEFAULT now(),
-    id_auteur      UUID NOT NULL REFERENCES utilisateur(id_utilisateur),
-    id_contenu     BIGINT NOT NULL REFERENCES contenu(id_contenu)
+    id_commentaire  BIGSERIAL PRIMARY KEY,
+    texte           TEXT NOT NULL,
+    date            TIMESTAMPTZ NOT NULL DEFAULT now(),
+    id_auteur       UUID NOT NULL REFERENCES utilisateur(id_utilisateur),
+    id_contenu      BIGINT NOT NULL REFERENCES contenu(id_contenu)
 );
 
 CREATE INDEX idx_commentaire_contenu ON commentaire(id_contenu);
 
 CREATE TABLE mention_jaime (
-    id_mention_jaime BIGSERIAL PRIMARY KEY,
-    date             TIMESTAMPTZ NOT NULL DEFAULT now(),
-    id_utilisateur   UUID NOT NULL REFERENCES utilisateur(id_utilisateur),
-    id_contenu       BIGINT NOT NULL REFERENCES contenu(id_contenu),
+    id_mention_jaime  BIGSERIAL PRIMARY KEY,
+    date              TIMESTAMPTZ NOT NULL DEFAULT now(),
+    id_utilisateur    UUID NOT NULL REFERENCES utilisateur(id_utilisateur),
+    id_contenu        BIGINT NOT NULL REFERENCES contenu(id_contenu),
 
     UNIQUE (id_utilisateur, id_contenu)
 );
 
 CREATE TABLE tag (
-    id_tag BIGSERIAL PRIMARY KEY,
-    nom    TEXT NOT NULL UNIQUE
+    id_tag  BIGSERIAL PRIMARY KEY,
+    nom     TEXT NOT NULL UNIQUE
 );
 
 CREATE TABLE association_tag (
-    id_association_tag BIGSERIAL PRIMARY KEY,
-    id_tag             BIGINT NOT NULL REFERENCES tag(id_tag),
-    id_contenu         BIGINT NOT NULL REFERENCES contenu(id_contenu),
+    id_association_tag  BIGSERIAL PRIMARY KEY,
+    id_tag              BIGINT NOT NULL REFERENCES tag(id_tag),
+    id_contenu          BIGINT NOT NULL REFERENCES contenu(id_contenu),
 
     UNIQUE (id_tag, id_contenu)
 );
