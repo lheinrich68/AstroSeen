@@ -55,7 +55,6 @@ Décision transversale : **aucun type énuméré** (enum PostgreSQL/Prisma) dans
 | Type matériel | Matériel | Télescope, Monture, Caméra, Oculaire, Filtre, Réducteur de focale, Barlow, Autoguideur, Trépied, Autre | Oui |
 | Classification astronomique | Objet | Étoile, Étoile variable, Planète, Planète naine, Comète, Astéroïde, Galaxie, Nébuleuse, Amas ouvert, Amas globulaire, Étoile à neutrons, Supernova, Reste de supernova, Satellite, Autre | Oui |
 | Type caractéristique | Caractéristique objet | Magnitude apparente, Distance, Taille apparente, Constellation, Type spectral, Type morphologique, Période orbitale, Redshift, Vitesse radiale, Masse, Rayon, Température de surface, Ascension droite (catalogue), Déclinaison (catalogue), Autre | Oui |
-| Statut publication note | Note | Brouillon, Publiée | Oui |
 | Source croquis | Croquis | Importé, Dessiné | Oui |
 | Type contenu | Contenu | Session, Note, Photo | Oui |
 | Visibilité contenu | Contenu | Privée, Publique | Oui |
@@ -124,7 +123,7 @@ Un même appareil physique (une caméra, un oculaire, une monture...) peut appar
 - rattachée en optionnel à une `Météo` (table de référence, remplace l'ancien `conditions_libre`) — un menu de sélection plutôt qu'un texte libre, valeurs de départ : *Dégagé*, *Partiellement nuageux*, *Nuageux*, *Couvert*, *Brumeux*, *Pluie*, *Vent fort*, *Orageux*, *Autre*
 - `evenements_imprevus` (texte libre, optionnel) — pour tout ce qui ne rentre dans aucune case et n'est pas une caractéristique récurrente du lieu (déjà couverte par `Lieu.bortle`) : un incident ponctuel et local propre à cette session (ex. lampadaire allumé par erreur, phares de voiture traversant le champ de vision, animal dérangeant l'observation)
 - `recit` (texte riche, optionnel) — un espace de rédaction longue, façon Notion (titres, listes, mise en forme), une fois les conditions et caractéristiques renseignées. Distinct des champs structurés ci-dessus : ceux-là sont des données mesurables, `recit` est le récit libre de la soirée que l'observateur veut garder. Stocké en Markdown côté base — **spec complète, non bridée** : titres H1 à H6, tableaux, liens, images, citations, blocs de code, listes à puces/numérotées/cases à cocher, séparateurs. Pas de sous-ensemble limité choisi arbitrairement — tout ce que le format Markdown permet nativement reste disponible. Côté frontend, l'éditeur suit le pattern Notion : quelques raccourcis rapides (gras, italique) toujours visibles, et une commande "/" qui ouvre le menu complet des types de blocs plutôt qu'une barre d'outils qui esaierait de tout lister.
-- rattachée à un `Statut publication note` (table de référence : brouillon/publiée) — remplace l'ancien `statut_validation`. Le statut « validée par pair » disparaît avec le mécanisme de validation, désormais abandonné : l'astronome certifié est un simple badge de distinction, sans droit de validation.
+- La notion de "brouillon" n'est plus une table séparée (`Statut_publication_note` retirée) — elle correspond directement à `Contenu.visibilite = Privée`. Le statut « validée par pair » avait déjà disparu avec l'abandon du mécanisme de validation : l'astronome certifié reste un simple badge de distinction, sans droit de validation.
 - `ascension_droite`, `declinaison` (float, degrés décimaux, tous deux optionnels) — position équatoriale de l'objet au moment de l'observation, pour les montures équatoriales
 - `azimut`, `hauteur` (float, degrés décimaux, tous deux optionnels) — position horizontale de l'objet, pour les montures alt-azimutales
   - Une seule des deux paires est renseignée par note, selon le type de monture utilisé. Aucune colonne ne stocke explicitement "quel système a été utilisé" : cette détermination se fait côté frontend en fonction des champs remplis. Toutes les valeurs sont stockées en degrés décimaux (y compris l'ascension droite, habituellement affichée en h/m/s) pour rester directement exploitables en calcul/tri — la conversion en h/m/s ou d/m/s ne se fait qu'à l'affichage.
@@ -184,8 +183,8 @@ Plutôt que de dupliquer trois fois (Session, Note, Photo) les mêmes mécanique
 
 **Contenu** (entité technique, pas une notion métier visible par l'utilisateur)
 - rattaché à un `Type contenu` (table de référence : session/note/photo) — dénormalisé sur Contenu, pour filtrer sans jointure supplémentaire
-- rattaché à une `Visibilite contenu` (table de référence : privée [défaut] / publique) — remplace le champ `visibilite` qui était directement sur `Session`
-- `date_publication` (optionnel, renseigné au moment du passage en public)
+- rattaché à une `Visibilite contenu` (table de référence : **privée [défaut] / session / publique**) — remplace le champ `visibilite` qui était directement sur `Session`. *Session* est un niveau intermédiaire : concrètement utilisé par `Note` et `Photo` (visible par les participants de la session sans être encore diffusé au fil d'actualité) ; `Session` en tant que type de `Contenu` n'a pas d'usage réel pour cette valeur-là, mais rien n'empêche techniquement de la lui appliquer — c'est une règle d'usage côté applicatif, pas une contrainte du schéma
+- `date_publication` (optionnel, renseigné au moment du passage en `publique`)
 
 `Session`, `Note` et `Photo` sont chacune reliées en 1-1 à une ligne `Contenu`, créée automatiquement à leur création. `Commentaire`, la nouvelle `Mention j'aime` et le nouveau système de `Tag` se rattachent tous à `Contenu` plutôt qu'à chacune des trois tables séparément.
 
@@ -243,7 +242,7 @@ Le calendrier combine deux sources bien distinctes, à ne pas mélanger dans une
 - rattaché à un `Statut signalement` (table de référence : *En attente* / *Traité*)
 - contrainte d'unicité (utilisateur, contenu) : une personne ne signale un même contenu qu'une fois, mais plusieurs personnes différentes peuvent signaler le même contenu — ce qui permet le comptage par contenu (nombre de signalements, motifs) affiché au modérateur
 
-**Visibilite_Contenu** — une 3ᵉ valeur s'ajoute : *Restreinte* (en plus de *Privée*/*Publique*), visible uniquement par le staff et l'auteur du contenu
+**Visibilite_Contenu** — une 4ᵉ valeur s'ajoute : *Restreinte* (en plus de *Privée*/*Session*/*Publique*, cette dernière déjà une évolution ultérieure — voir plus haut), visible uniquement par le staff et l'auteur du contenu
 
 **Action_Moderation** (nouvelle entité) — trace ce que fait un modérateur **sur un contenu** (pas sur un signalement précis, puisqu'il examine l'ensemble des signalements reçus avant d'agir ; plusieurs actions possibles dans le temps sur un même contenu, ex. restreindre puis republier)
 - rattachée au `Contenu` concerné et à l'`Utilisateur` modérateur qui agit
@@ -310,7 +309,6 @@ erDiagram
   CLASSIFICATION_ASTRONOMIQUE ||--o{ OBJET : qualifie
   OBJET ||--o{ CARACTERISTIQUE_OBJET : possede
   TYPE_CARACTERISTIQUE ||--o{ CARACTERISTIQUE_OBJET : qualifie
-  STATUT_PUBLICATION_NOTE ||--o{ NOTE : qualifie
   METEO o|--o{ NOTE : qualifie
   SOURCE_CROQUIS ||--o{ CROQUIS : qualifie
   TYPE_CONTENU ||--o{ CONTENU : qualifie
@@ -415,9 +413,6 @@ erDiagram
     datetime updated_at
   }
   METEO {
-    string libelle
-  }
-  STATUT_PUBLICATION_NOTE {
     string libelle
   }
   PHOTO {

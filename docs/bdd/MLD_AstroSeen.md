@@ -61,14 +61,13 @@ CARACTERISTIQUE_OBJET (id_caracteristique_objet, #id_objet, #id_type_caracterist
 TYPE_CARACTERISTIQUE (id_type_caracteristique, libelle, unite_par_defaut)
 
 NOTE (id_note, date_note, seeing_pickering, transparence, temperature, humidite, pression,
-      #id_meteo, evenements_imprevus, recit, #id_statut_publication_note, ascension_droite, declinaison,
+      #id_meteo, evenements_imprevus, recit, ascension_droite, declinaison,
       azimut, hauteur, heure_debut, heure_fin,
       #id_session, #id_redacteur, #id_lieu, #id_ensemble, #id_objet, #id_contenu,
       created_at, updated_at)
 
 METEO (id_meteo, libelle)
 
-STATUT_PUBLICATION_NOTE (id_statut_publication_note, libelle)
 
 CROQUIS (id_croquis, image, #id_source_croquis, date_creation, #id_note)
 

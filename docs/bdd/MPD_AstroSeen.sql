@@ -6,7 +6,7 @@
 -- Stratégie de clés primaires :
 --   UUID      -> entités adressables directement (URL publique/partageable) :
 --                utilisateur, session, note, photo, objet, evenement_astro
---   BIGSERIAL -> tables internes/techniques, jamais consultées via leur
+--   SERIAL    -> tables internes/techniques, jamais consultées via leur
 --                propre URL : toutes les autres
 --
 -- Aucun type ENUM PostgreSQL : toutes les classifications (statuts, types,
@@ -25,63 +25,63 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- ---------------------------------------------------------------------------
--- Tables de référence -> toutes BIGSERIAL, internes, id + libelle uniquement
+-- Tables de référence -> toutes SERIAL, internes, id + libelle uniquement
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE statut_utilisateur (
-    id_statut_utilisateur  BIGSERIAL PRIMARY KEY,
+    id_statut_utilisateur  SERIAL PRIMARY KEY,
     libelle                TEXT NOT NULL
 );
 
 CREATE TABLE niveau_experience (
-    id_niveau_experience  BIGSERIAL PRIMARY KEY,
+    id_niveau_experience  SERIAL PRIMARY KEY,
     libelle               TEXT NOT NULL
 );
 
 CREATE TABLE role_plateforme (
-    id_role_plateforme  BIGSERIAL PRIMARY KEY,
+    id_role_plateforme  SERIAL PRIMARY KEY,
     libelle             TEXT NOT NULL
 );
 
 CREATE TABLE etat_compte (
-    id_etat_compte  BIGSERIAL PRIMARY KEY,
+    id_etat_compte  SERIAL PRIMARY KEY,
     libelle         TEXT NOT NULL
 );
 
 CREATE TABLE visibilite_participation (
-    id_visibilite_participation  BIGSERIAL PRIMARY KEY,
+    id_visibilite_participation  SERIAL PRIMARY KEY,
     libelle                      TEXT NOT NULL
 );
 
 CREATE TABLE type_session (
-    id_type_session  BIGSERIAL PRIMARY KEY,
+    id_type_session  SERIAL PRIMARY KEY,
     libelle          TEXT NOT NULL
 );
 
 CREATE TABLE statut_session (
-    id_statut_session  BIGSERIAL PRIMARY KEY,
+    id_statut_session  SERIAL PRIMARY KEY,
     libelle            TEXT NOT NULL
 );
 
 CREATE TABLE statut_participation (
-    id_statut_participation  BIGSERIAL PRIMARY KEY,
+    id_statut_participation  SERIAL PRIMARY KEY,
     libelle                  TEXT NOT NULL
 );
 
 CREATE TABLE categorie_ensemble (
-    id_categorie_ensemble  BIGSERIAL PRIMARY KEY,
+    id_categorie_ensemble  SERIAL PRIMARY KEY,
     libelle                TEXT NOT NULL
 );
 
 CREATE TABLE type_materiel (
-    id_type_materiel  BIGSERIAL PRIMARY KEY,
+    id_type_materiel  SERIAL PRIMARY KEY,
     libelle           TEXT NOT NULL
 );
 
 -- Classification d'un objet du ciel (ex-"type_objet") : renommé pour plus de
 -- précision astronomique.
 CREATE TABLE classification_astronomique (
-    id_classification_astronomique  BIGSERIAL PRIMARY KEY,
+    id_classification_astronomique  SERIAL PRIMARY KEY,
     libelle                         TEXT NOT NULL,
     icone_vectorielle               TEXT -- icône SVG générique (fallback quand le filtre "Mes photos" est vide)
 );
@@ -89,18 +89,18 @@ CREATE TABLE classification_astronomique (
 -- Nom d'une caractéristique observable/cataloguée d'un objet (magnitude,
 -- distance, type spectral...) -> table de référence, pas de texte libre.
 CREATE TABLE type_caracteristique (
-    id_type_caracteristique  BIGSERIAL PRIMARY KEY,
+    id_type_caracteristique  SERIAL PRIMARY KEY,
     libelle                  TEXT NOT NULL,
     unite_par_defaut         TEXT -- ex: "mag", "al", "arcmin" -> indicative, peut être surchargée par ligne
 );
 
 CREATE TABLE statut_publication_note (
-    id_statut_publication_note  BIGSERIAL PRIMARY KEY,
+    id_statut_publication_note  SERIAL PRIMARY KEY,
     libelle                     TEXT NOT NULL
 );
 
 CREATE TABLE meteo (
-    id_meteo  BIGSERIAL PRIMARY KEY,
+    id_meteo  SERIAL PRIMARY KEY,
     libelle   TEXT NOT NULL
 );
 
@@ -116,29 +116,29 @@ VALUES
     ('Orageux');
 
 CREATE TABLE source_croquis (
-    id_source_croquis BIGSERIAL PRIMARY KEY,
+    id_source_croquis SERIAL PRIMARY KEY,
     libelle           TEXT NOT NULL
 );
 
 CREATE TABLE type_contenu (
-    id_type_contenu  BIGSERIAL PRIMARY KEY,
+    id_type_contenu  SERIAL PRIMARY KEY,
     libelle          TEXT NOT NULL
 );
 
 CREATE TABLE visibilite_contenu (
-    id_visibilite_contenu  BIGSERIAL PRIMARY KEY,
+    id_visibilite_contenu  SERIAL PRIMARY KEY,
     libelle                TEXT NOT NULL
 );
 
 CREATE TABLE type_evenement_astro (
-    id_type_evenement_astro  BIGSERIAL PRIMARY KEY,
+    id_type_evenement_astro  SERIAL PRIMARY KEY,
     libelle                  TEXT NOT NULL,
     icone_vectorielle        TEXT -- icône propre à chaque type, identification visuelle rapide
 );
 
 CREATE TABLE niveau_importance_evenement (
-    id_niveau_importance_evenement  BIGSERIAL PRIMARY KEY,
-    libelle                         TEXT NOT NULL
+                                             id_niveau_importance_evenement SERIAL PRIMARY KEY,
+                                             libelle                        TEXT NOT NULL
 );
 
 -- Données de départ
@@ -227,18 +227,6 @@ VALUES
     ('Satellite'),
     ('Autre');
 
-INSERT INTO classification_astronomique (libelle)
-VALUES
-    ('Étoile'),
-    ('Étoile variable'),
-    ('Planète'),
-    ('Planète naine'),
-    ('Comète'),
-    ('Astéroïde'),
-    ('DSO'),
-    ('Satellite'),
-    ('Autre');
-
 INSERT INTO type_caracteristique (libelle, unite_par_defaut)
 VALUES
     ('Magnitude apparente', 'mag'),
@@ -257,11 +245,6 @@ VALUES
     ('Déclinaison (catalogue)', 'degrés'),
     ('Autre', NULL);
 
-INSERT INTO statut_publication_note (libelle)
-VALUES
-    ('Brouillon'),
-    ('Publiée');
-
 INSERT INTO source_croquis (libelle)
 VALUES
     ('Importé'),
@@ -276,6 +259,7 @@ VALUES
 INSERT INTO visibilite_contenu (libelle)
 VALUES
     ('Privée'),
+    ('Session'),
     ('Publique');
 
 INSERT INTO type_evenement_astro (libelle)
@@ -290,8 +274,9 @@ VALUES
 
 INSERT INTO niveau_importance_evenement (libelle)
 VALUES
-    ('Majeur'),
-    ('Mineur');
+    ('Basse'),
+    ('Modéré'),
+    ('Haute');
 
 -- ---------------------------------------------------------------------------
 -- Utilisateur (UUID => profil consultable directement)
@@ -335,12 +320,12 @@ CREATE TRIGGER trg_utilisateur_updated_at
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- ---------------------------------------------------------------------------
--- Contenu (BIGSERIAL => technique, jamais consulté via sa propre URL)
+-- Contenu (SERIAL => technique, jamais consulté via sa propre URL)
 -- créé avant Session/Note/Photo car référencé par elles
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE contenu (
-    id_contenu             BIGSERIAL PRIMARY KEY,
+    id_contenu             SERIAL PRIMARY KEY,
     id_type_contenu        BIGINT NOT NULL REFERENCES type_contenu(id_type_contenu),
     id_visibilite_contenu  BIGINT NOT NULL REFERENCES visibilite_contenu(id_visibilite_contenu),
     date_publication       TIMESTAMPTZ
@@ -350,11 +335,11 @@ CREATE INDEX idx_contenu_type ON contenu(id_type_contenu);
 CREATE INDEX idx_contenu_visibilite ON contenu(id_visibilite_contenu);
 
 -- ---------------------------------------------------------------------------
--- Lieu (BIGSERIAL => interne, jamais sa propre page publique)
+-- Lieu (SERIAL => interne, jamais sa propre page publique)
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE lieu (
-    id_lieu          BIGSERIAL PRIMARY KEY,
+    id_lieu          SERIAL PRIMARY KEY,
     nom              TEXT NOT NULL,
     latitude         DOUBLE PRECISION NOT NULL,
     longitude        DOUBLE PRECISION NOT NULL,
@@ -368,7 +353,7 @@ CREATE INDEX idx_lieu_coordonnees_arrondies
     ON lieu (ROUND(latitude::numeric, 3), ROUND(longitude::numeric, 3));
 
 -- ---------------------------------------------------------------------------
--- Session (UUID => page de session partageable) / Participation (BIGSERIAL)
+-- Session (UUID => page de session partageable) / Participation (SERIAL)
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE session (
@@ -397,7 +382,7 @@ CREATE INDEX idx_session_lieu ON session(id_lieu_par_defaut);
 CREATE INDEX idx_session_statut ON session(id_statut_session);
 
 CREATE TABLE participation (
-    id_participation         BIGSERIAL PRIMARY KEY,
+    id_participation         SERIAL PRIMARY KEY,
     id_statut_participation  BIGINT NOT NULL REFERENCES statut_participation(id_statut_participation),
     id_utilisateur           UUID NOT NULL REFERENCES utilisateur(id_utilisateur),
     id_session               UUID NOT NULL REFERENCES session(id_session),
@@ -406,11 +391,11 @@ CREATE TABLE participation (
 );
 
 -- ---------------------------------------------------------------------------
--- Ensemble / Matériel (BIGSERIAL -> internes)
+-- Ensemble / Matériel (SERIAL -> internes)
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE ensemble (
-    id_ensemble            BIGSERIAL PRIMARY KEY,
+    id_ensemble            SERIAL PRIMARY KEY,
     nom                    TEXT NOT NULL,
     id_categorie_ensemble  BIGINT NOT NULL REFERENCES categorie_ensemble(id_categorie_ensemble),
     id_proprietaire        UUID NOT NULL REFERENCES utilisateur(id_utilisateur)
@@ -420,7 +405,7 @@ CREATE INDEX idx_ensemble_proprietaire ON ensemble(id_proprietaire);
 CREATE INDEX idx_ensemble_categorie ON ensemble(id_categorie_ensemble);
 
 CREATE TABLE materiel (
-    id_materiel       BIGSERIAL PRIMARY KEY,
+    id_materiel       SERIAL PRIMARY KEY,
     id_type_materiel  BIGINT NOT NULL REFERENCES type_materiel(id_type_materiel),
     marque            TEXT,
     modele            TEXT,
@@ -432,7 +417,7 @@ CREATE TABLE materiel (
 CREATE INDEX idx_materiel_type ON materiel(id_type_materiel);
 
 CREATE TABLE ensemble_materiel (
-    id_ensemble_materiel  BIGSERIAL PRIMARY KEY,
+    id_ensemble_materiel  SERIAL PRIMARY KEY,
     id_ensemble           BIGINT NOT NULL REFERENCES ensemble(id_ensemble),
     id_materiel           BIGINT NOT NULL REFERENCES materiel(id_materiel),
 
@@ -460,7 +445,7 @@ CREATE TRIGGER trg_cleanup_materiel_orphelin
 
 -- ---------------------------------------------------------------------------
 -- Objet du ciel (UUID -> fiche planétarium publique, ex-"Cible")
--- Désignation / Caractéristique_Objet (BIGSERIAL)
+-- Désignation / Caractéristique_Objet (SERIAL)
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE objet (
@@ -475,7 +460,7 @@ CREATE TABLE objet (
 CREATE INDEX idx_objet_classification ON objet(id_classification_astronomique);
 
 CREATE TABLE designation (
-    id_designation  BIGSERIAL PRIMARY KEY,
+    id_designation  SERIAL PRIMARY KEY,
     catalogue       TEXT NOT NULL,
     code            TEXT NOT NULL,
     id_objet        UUID NOT NULL REFERENCES objet(id_objet),
@@ -489,7 +474,7 @@ CREATE INDEX idx_designation_objet ON designation(id_objet);
 -- par caractéristique, nombre illimité et variable selon le type d'objet
 -- (une planète et une galaxie n'ont pas les mêmes caractéristiques pertinentes).
 CREATE TABLE caracteristique_objet (
-    id_caracteristique_objet  BIGSERIAL PRIMARY KEY,
+    id_caracteristique_objet  SERIAL PRIMARY KEY,
     id_objet                  UUID NOT NULL REFERENCES objet(id_objet),
     id_type_caracteristique   BIGINT NOT NULL REFERENCES type_caracteristique(id_type_caracteristique),
     valeur                    TEXT NOT NULL,
@@ -501,7 +486,7 @@ CREATE TABLE caracteristique_objet (
 CREATE INDEX idx_caracteristique_objet_objet ON caracteristique_objet(id_objet);
 
 -- ---------------------------------------------------------------------------
--- Note d'observation (UUID -> publiable/partageable) / Croquis (BIGSERIAL)
+-- Note d'observation (UUID -> publiable/partageable) / Croquis (SERIAL)
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE note (
@@ -515,7 +500,6 @@ CREATE TABLE note (
     id_meteo                    BIGINT REFERENCES meteo(id_meteo),
     evenements_imprevus         TEXT,
     recit                       TEXT, -- rédaction longue façon Notion (Markdown), rendu riche géré côté frontend
-    id_statut_publication_note  BIGINT NOT NULL REFERENCES statut_publication_note(id_statut_publication_note),
     ascension_droite            DOUBLE PRECISION,
     declinaison                 DOUBLE PRECISION,
     azimut                      DOUBLE PRECISION,
@@ -535,7 +519,6 @@ CREATE TABLE note (
 CREATE INDEX idx_note_session ON note(id_session);
 CREATE INDEX idx_note_redacteur ON note(id_redacteur);
 CREATE INDEX idx_note_objet ON note(id_objet);
-CREATE INDEX idx_note_statut_publication ON note(id_statut_publication_note);
 CREATE INDEX idx_note_meteo ON note(id_meteo);
 
 CREATE TRIGGER trg_note_updated_at
@@ -543,7 +526,7 @@ CREATE TRIGGER trg_note_updated_at
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 CREATE TABLE croquis (
-    id_croquis         BIGSERIAL PRIMARY KEY,
+    id_croquis         SERIAL PRIMARY KEY,
     image              TEXT NOT NULL,
     id_source_croquis  BIGINT NOT NULL REFERENCES source_croquis(id_source_croquis),
     date_creation      TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -553,7 +536,7 @@ CREATE TABLE croquis (
 CREATE INDEX idx_croquis_note ON croquis(id_note);
 
 -- ---------------------------------------------------------------------------
--- Photo (UUID -> publiable/partageable) / Astrophoto (BIGSERIAL)
+-- Photo (UUID -> publiable/partageable) / Astrophoto (SERIAL)
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE photo (
@@ -578,7 +561,7 @@ CREATE TRIGGER trg_photo_updated_at
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 CREATE TABLE details_astrophoto (
-    id_details_astrophoto  BIGSERIAL PRIMARY KEY,
+    id_details_astrophoto  SERIAL PRIMARY KEY,
     gain_iso               TEXT,
     ouverture              DOUBLE PRECISION,
     focale_effective       DOUBLE PRECISION,
@@ -591,7 +574,7 @@ CREATE TABLE details_astrophoto (
 );
 
 CREATE TABLE acquisition_filtre (
-    id_acquisition_filtre  BIGSERIAL PRIMARY KEY,
+    id_acquisition_filtre  SERIAL PRIMARY KEY,
     filtre                 TEXT NOT NULL,
     temps_pose             DOUBLE PRECISION,
     nombre_poses           INTEGER,
@@ -602,11 +585,11 @@ CREATE TABLE acquisition_filtre (
 CREATE INDEX idx_acquisition_filtre_details ON acquisition_filtre(id_details_astrophoto);
 
 -- ---------------------------------------------------------------------------
--- Interactions communautaires (BIGSERIAL -> internes, jamais leur propre URL)
+-- Interactions communautaires (SERIAL -> internes, jamais leur propre URL)
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE commentaire (
-    id_commentaire  BIGSERIAL PRIMARY KEY,
+    id_commentaire  SERIAL PRIMARY KEY,
     texte           TEXT NOT NULL,
     date            TIMESTAMPTZ NOT NULL DEFAULT now(),
     id_auteur       UUID NOT NULL REFERENCES utilisateur(id_utilisateur),
@@ -616,7 +599,7 @@ CREATE TABLE commentaire (
 CREATE INDEX idx_commentaire_contenu ON commentaire(id_contenu);
 
 CREATE TABLE mention_jaime (
-    id_mention_jaime  BIGSERIAL PRIMARY KEY,
+    id_mention_jaime  SERIAL PRIMARY KEY,
     date              TIMESTAMPTZ NOT NULL DEFAULT now(),
     id_utilisateur    UUID NOT NULL REFERENCES utilisateur(id_utilisateur),
     id_contenu        BIGINT NOT NULL REFERENCES contenu(id_contenu),
@@ -625,12 +608,12 @@ CREATE TABLE mention_jaime (
 );
 
 CREATE TABLE tag (
-    id_tag  BIGSERIAL PRIMARY KEY,
+    id_tag  SERIAL PRIMARY KEY,
     nom     TEXT NOT NULL UNIQUE
 );
 
 CREATE TABLE association_tag (
-    id_association_tag  BIGSERIAL PRIMARY KEY,
+    id_association_tag  SERIAL PRIMARY KEY,
     id_tag              BIGINT NOT NULL REFERENCES tag(id_tag),
     id_contenu          BIGINT NOT NULL REFERENCES contenu(id_contenu),
 
