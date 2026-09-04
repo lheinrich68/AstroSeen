@@ -1,13 +1,12 @@
 # MLD // AstroSeen
 
-Modèle logique de données, dérivé du MEA/MCD (`modele-donnees-observations-ciel_v2.md`).
-Notation standard : clé primaire **soulignée** (représentée ici en gras), clé étrangère préfixée `#`.
+Modèle logique de données, dérivé du MEA/MCD (`modele-donnees-observations-ciel_v2.md`). Notation standard : clé primaire **soulignée** (représentée ici en gras), clé étrangère préfixée `#`.
 
 Aucun enum : chaque classification est une table de référence (id + libelle).
 
 ```
-UTILISATEUR (id_utilisateur, pseudo, email, mot_de_passe_hash, nom_affiche, bio,
-             #id_statut_utilisateur, #id_niveau_experience, #id_role_plateforme,
+USER (id_user, pseudo, email, hashed_password, nom_affiche, bio,
+             #id_statut_utilisateur, #id_niveau_experience, #id_role,
              astronome_certifie, #id_certificateur, date_certification,
              consentement_cgu_date, date_derniere_connexion, #id_etat_compte,
              photo_profil, email_verifie, token_verification_email,
@@ -20,7 +19,7 @@ STATUT_UTILISATEUR (id_statut_utilisateur, libelle)
 
 NIVEAU_EXPERIENCE (id_niveau_experience, libelle)
 
-ROLE_PLATEFORME (id_role_plateforme, libelle)
+ROLE (id_role, libelle)
 
 ETAT_COMPTE (id_etat_compte, libelle)
 
@@ -34,7 +33,7 @@ TYPE_SESSION (id_type_session, libelle)
 
 STATUT_SESSION (id_statut_session, libelle)
 
-PARTICIPATION (id_participation, #id_statut_participation, #id_utilisateur, #id_session)
+PARTICIPATION (id_participation, #id_statut_participation, #id_user, #id_session)
 
 STATUT_PARTICIPATION (id_statut_participation, libelle)
 
@@ -83,15 +82,21 @@ DETAILS_ASTROPHOTO (id_details_astrophoto, gain_iso, ouverture, focale_effective
 ACQUISITION_FILTRE (id_acquisition_filtre, filtre, temps_pose, nombre_poses,
                      nombre_flats, #id_details_astrophoto)
 
+PUBLICATION (id_publication, texte, #id_auteur, #id_contenu,
+             #id_photo, #id_note, #id_croquis, created_at, updated_at)
+
 CONTENU (id_contenu, #id_type_contenu, #id_visibilite_contenu, date_publication)
 
 TYPE_CONTENU (id_type_contenu, libelle)
 
 VISIBILITE_CONTENU (id_visibilite_contenu, libelle)
 
-COMMENTAIRE (id_commentaire, texte, date, #id_auteur, #id_contenu)
+COMMENTAIRE (id_commentaire, texte, date, #id_auteur, #id_contenu, #id_commentaire_parent)
 
-MENTION_JAIME (id_mention_jaime, date, #id_utilisateur, #id_contenu)
+MENTION_UTILISATEUR (id_mention_utilisateur, created_at, #id_utilisateur_mentionne,
+                      #id_commentaire, #id_publication)
+
+MENTION_JAIME (id_mention_jaime, date, #id_user, #id_contenu)
 
 TAG (id_tag, nom)
 
@@ -110,15 +115,15 @@ NIVEAU_IMPORTANCE_EVENEMENT (id_niveau_importance_evenement, libelle)
 
 | Table | Contrainte | Raison |
 |---|---|---|
-| UTILISATEUR | `pseudo` unique, `email` unique | identification |
-| PARTICIPATION | (`id_utilisateur`, `id_session`) unique | un utilisateur ne participe qu'une fois à une session — relevé dès la relecture v1 |
+| USER | `pseudo` unique, `email` unique | identification |
+| PARTICIPATION | (`id_user`, `id_session`) unique | un utilisateur ne participe qu'une fois à une session — relevé dès la relecture v1 |
 | DESIGNATION | (`catalogue`, `code`) unique | pas deux fois la même désignation |
 | ENSEMBLE_MATERIEL | (`id_ensemble`, `id_materiel`) unique | pas de doublon d'association |
 | MATERIEL | (`id_type_materiel`, `marque`, `modele`) unique | dédoublonnage — deux utilisateurs avec le même modèle pointent vers la même fiche |
 | CARACTERISTIQUE_OBJET | (`id_objet`, `id_type_caracteristique`) unique | pas deux fois la même caractéristique sur un objet |
 | SESSION / NOTE / PHOTO | `id_contenu` unique | relation 1-1 stricte avec CONTENU |
 | DETAILS_ASTROPHOTO | `id_photo` unique | relation 1-1 stricte avec PHOTO |
-| MENTION_JAIME | (`id_utilisateur`, `id_contenu`) unique | un like par personne et par contenu |
+| MENTION_JAIME | (`id_user`, `id_contenu`) unique | un like par personne et par contenu |
 | ASSOCIATION_TAG | (`id_tag`, `id_contenu`) unique | pas de doublon d'étiquetage |
 | TAG | `nom` unique | pas deux tags identiques |
 
@@ -126,7 +131,7 @@ NIVEAU_IMPORTANCE_EVENEMENT (id_niveau_importance_evenement, libelle)
 
 | FK | Nullable ? | Raison |
 |---|---|---|
-| `UTILISATEUR.#id_certificateur` | oui | tous les utilisateurs ne sont pas certifiés |
+| `USER.#id_certificateur` | oui | tous les utilisateurs ne sont pas certifiés |
 | `SESSION.#id_lieu_par_defaut` | oui | lieu par défaut optionnel |
 | `SESSION.#id_type_session` | oui | type de session optionnel |
 | `NOTE.#id_lieu`, `#id_ensemble`, `#id_objet` | oui | observation à l'œil nu possible, objet pas toujours catalogué |

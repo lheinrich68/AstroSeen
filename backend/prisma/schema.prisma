@@ -9,37 +9,47 @@ datasource db {
   // et fournie via un adaptateur de driver au PrismaClient (src/config/db.js).
 }
 
-// =====================================================================================================================
-// Tables de référence
-// =====================================================================================================================
-model Statut_user {
-  id      Int    @id @default(autoincrement()) @map("id_status_user")
-  libelle String
-  users   User[]
+// ---------------------------------------------------------------------------
+// Traduction Prisma du MPD (docs/mpd_astroseen.sql), lui-même dérivé du MLD
+// (docs/mld_astroseen.md). Aucun enum Prisma/PostgreSQL : toutes les
+// classifications sont des tables de référence (id + libelle), plus simples
+// à manipuler côté code. Stratégie de clés :
+//   UUID      -> entités adressables directement (URL publique/partageable) :
+//                User, Session, Note, Photo, Objet, Evenement_Astro
+//   Int/autoincrement (SERIAL côté SQL) -> tables internes/techniques
+// Champs camelCase côté code, mappés en snake_case côté colonnes (@map/@@map).
+// ---------------------------------------------------------------------------
 
-  @@map("statut_user")
+// --- Tables de référence -----------------------------------------------------
+
+model Statut_Utilisateur {
+  id           Int    @id @default(autoincrement()) @map("id_statut_utilisateur")
+  libelle      String
+  utilisateurs User[]
+
+  @@map("statut_utilisateur")
 }
 
 model Niveau_Experience {
-  id      Int    @id @default(autoincrement()) @map("id_niveau_experience")
-  libelle String
-  users   User[]
+  id           Int    @id @default(autoincrement()) @map("id_niveau_experience")
+  libelle      String
+  utilisateurs User[]
 
   @@map("niveau_experience")
 }
 
 model Role {
-  id      Int    @id @default(autoincrement()) @map("id_role")
-  libelle String
-  users   User[]
+  id           Int    @id @default(autoincrement()) @map("id_role")
+  libelle      String
+  utilisateurs User[]
 
   @@map("role")
 }
 
 model Etat_Compte {
-  id      Int    @id @default(autoincrement()) @map("id_etat_compte")
-  libelle String
-  users   User[]
+  id           Int    @id @default(autoincrement()) @map("id_etat_compte")
+  libelle      String
+  utilisateurs User[]
 
   @@map("etat_compte")
 }
@@ -102,10 +112,10 @@ model Classification_Astronomique {
 }
 
 model Type_Caracteristique {
-  id                    Int                     @id @default(autoincrement()) @map("id_type_caracteristique")
-  libelle               String
-  uniteParDefaut        String?                 @map("unite_par_defaut")
-  caracteristiquesObjet Caracteristique_Objet[]
+  id               Int                     @id @default(autoincrement()) @map("id_type_caracteristique")
+  libelle          String
+  uniteParDefaut   String?                 @map("unite_par_defaut")
+  caracteristiques Caracteristique_Objet[]
 
   @@map("type_caracteristique")
 }
@@ -159,51 +169,48 @@ model Niveau_Importance_Evenement {
   @@map("niveau_importance_evenement")
 }
 
-// =====================================================================================================================
-// UUID => Entités adressables directement
-// =====================================================================================================================
+// --- UUID : entités adressables directement ---------------------------------
+
 model User {
   id             String  @id @default(uuid()) @map("id_user")
   pseudo         String  @unique
   email          String  @unique
-  hashedPassword String  @map("hashed_pswd")
+  hashedPassword String  @map("hashed_password")
   nomAffiche     String? @map("nom_affiche")
   bio            String?
 
-  statut   Statut_user @relation(fields: [statutId], references: [id])
-  statutId Int         @map("id_status_user")
+  statut             Statut_Utilisateur @relation(fields: [statutId], references: [id])
+  statutId           Int                @map("id_statut_utilisateur")
+  niveauExperience   Niveau_Experience  @relation(fields: [niveauExperienceId], references: [id])
+  niveauExperienceId Int                @map("id_niveau_experience")
+  role               Role               @relation(fields: [roleId], references: [id])
+  roleId             Int                @map("id_role")
 
-  niveauExperience   Niveau_Experience @relation(fields: [niveauExperienceId], references: [id])
-  niveauExperienceId Int               @map("id_niveau_experience")
-
-  role   Role @relation(fields: [roleId], references: [id])
-  roleId Int  @map("id_role")
-
-  astronomeCertifie Boolean @map("astronome_certifie")
-
+  astronomeCertifie Boolean   @default(false) @map("astronome_certifie")
   certifiePar       User?     @relation("Certification", fields: [certifieParId], references: [id])
-  certifieParId     String?   @map("certifie_par")
+  certifieParId     String?   @map("id_certificateur")
   certifications    User[]    @relation("Certification")
   dateCertification DateTime? @map("date_certification")
 
-  dateConsentementCgu   DateTime? @map("date_consentement_cgu")
+  consentementCguDate   DateTime? @map("consentement_cgu_date")
   dateDerniereConnexion DateTime? @map("date_derniere_connexion")
 
   // BANNI/SUPPRIME : le contenu (sessions, notes, photos, commentaires...)
   // reste lié à cette même ligne — c'est cet état qui fait afficher
-  // "Utilisateur anonyme" à la lecture, pas une réassignation de FK.
-  // SUPPRIME va plus loin : email/motDePasseHash/nomAffiche/bio/pseudo sont
-  // réellement écrasés (-> droit à l'effacement RGPD).
+  // "User anonyme" à la lecture, pas une réassignation de FK.
+  // SUPPRIME va plus loin : email/hashedPassword/nomAffiche/bio/pseudo sont
+  // réellement écrasés (droit à l'effacement RGPD).
   etatCompte   Etat_Compte @relation(fields: [etatCompteId], references: [id])
   etatCompteId Int         @map("id_etat_compte")
 
   photoProfil String? @map("photo_profil")
 
-  // Vérification email à la création du compte.
-  emailVerifie        Boolean   @default(false) @map("email_verifie")
-  tokenVerifEmail     String?   @map("token_verif_email")
-  dateExpirationToken DateTime? @map("date_expiration_token")
-  dateVerifEmail      DateTime? @map("date_verif_email")
+  // Vérification email à la création du compte (AST-19/AST-20 : décider si
+  // le login est bloqué tant que emailVerifie=false, ou seulement limité).
+  emailVerifie           Boolean   @default(false) @map("email_verifie")
+  tokenVerificationEmail String?   @map("token_verification_email")
+  dateExpirationToken    DateTime? @map("date_expiration_token")
+  dateVerificationEmail  DateTime? @map("date_verification_email")
 
   // Distinct du token de vérification email, volontairement — partager le
   // même jeton entre les deux flux invaliderait l'un en résolvant l'autre.
@@ -216,7 +223,7 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  sessionsCreees  Session[]         @relation("SessionCreateur")
+  sessionsCreees  Session[]             @relation("SessionCreateur")
   participations  Participation[]
   lieux           Lieu[]
   ensembles       Ensemble[]
@@ -225,6 +232,8 @@ model User {
   commentaires    Commentaire[]
   mentionsJaime   Mention_Jaime[]
   evenementsCrees Evenement_Astro[]
+  publications    Publication[]
+  mentionsRecues  Mention_Utilisateur[]
 
   @@map("user")
 }
@@ -237,14 +246,12 @@ model Session {
   heureDebut  DateTime? @map("heure_debut") @db.Time
   dateFin     DateTime? @map("date_fin") @db.Date
 
-  statut   Statut_Session @relation(fields: [statutId], references: [id])
-  statutId Int            @map("id_statut_session")
-
+  statut                    Statut_Session           @relation(fields: [statutId], references: [id])
+  statutId                  Int                      @map("id_statut_session")
   visibiliteParticipation   Visibilite_Participation @relation(fields: [visibiliteParticipationId], references: [id])
   visibiliteParticipationId Int                      @map("id_visibilite_participation")
-
-  typeSession   Type_Session? @relation(fields: [typeSessionId], references: [id])
-  typeSessionId Int?          @map("id_type_session")
+  typeSession               Type_Session?            @relation(fields: [typeSessionId], references: [id])
+  typeSessionId             Int?                     @map("id_type_session")
 
   creePar   User   @relation("SessionCreateur", fields: [creeParId], references: [id])
   creeParId String @map("id_createur")
@@ -272,43 +279,40 @@ model Note {
   // session s'étale sur plusieurs nuits.
   dateNote DateTime @map("date_note") @db.Date
 
-  seeingPickering Int?   @map("seeing_picker") // 1 à 10 => 1= très mauvaise turbulence ; 10= Parfaite turbulence
+  seeingPickering Int?   @map("seeing_pickering")
   transparence    Float?
   temperature     Float?
   humidite        Float?
   pression        Float?
 
-  meteo   Meteo? @relation(fields: [meteoId], references: [id])
-  meteoId Int?   @map("id_meteo")
-
-  evenementImprevus String? @map("evenement_imprevus")
-  recit             String? // rédaction longue façon Notion (Markdown), rendu riche géré côté frontend
+  meteo              Meteo?  @relation(fields: [meteoId], references: [id])
+  meteoId            Int?    @map("id_meteo")
+  evenementsImprevus String? @map("evenements_imprevus")
+  recit              String? // rédaction longue façon Notion (Markdown), rendu riche géré côté frontend
 
   ascensionDroite Float? @map("ascension_droite")
   declinaison     Float?
   azimut          Float?
   hauteur         Float?
 
-  heureDebut DateTime? @map("heure_debut") @db.Time
-  heureFin   DateTime? @map("heure_fin") @db.Time
+  heureDebut DateTime? @map("heure_debut")
+  heureFin   DateTime? @map("heure_fin")
 
-  session   Session @relation(fields: [sessionId], references: [id])
-  sessionId String  @map("id_session")
+  session     Session @relation(fields: [sessionId], references: [id])
+  sessionId   String  @map("id_session")
+  redigePar   User    @relation(fields: [redigeParId], references: [id])
+  redigeParId String  @map("id_redacteur")
 
-  redigePar   User   @relation(fields: [redigeParId], references: [id])
-  redigeParId String @map("id_redacteur")
-
-  lieu   Lieu? @relation(fields: [lieuId], references: [id])
-  lieuId Int?  @map("id_lieu")
-
+  lieu       Lieu?     @relation(fields: [lieuId], references: [id])
+  lieuId     Int?      @map("id_lieu")
   ensemble   Ensemble? @relation(fields: [ensembleId], references: [id])
   ensembleId Int?      @map("id_ensemble")
+  objet      Objet?    @relation(fields: [objetId], references: [id])
+  objetId    String?   @map("id_objet")
 
-  objet   Objet?  @relation(fields: [objetId], references: [id])
-  objetId String? @map("id_objet")
-
-  photos  Photo[]
-  croquis Croquis[]
+  photos       Photo[]
+  croquis      Croquis[]
+  publications Publication[] // publications qui référencent cette note
 
   contenu   Contenu @relation(fields: [contenuId], references: [id])
   contenuId Int     @unique @map("id_contenu")
@@ -320,25 +324,24 @@ model Note {
 }
 
 model Photo {
-  id        String   @id @default(uuid()) @map("id_photo")
-  datePrise DateTime @map("date_prise")
+  id        String    @id @default(uuid()) @map("id_photo")
+  datePrise DateTime? @map("date_prise")
 
-  session   Session? @relation(fields: [sessionId], references: [id])
-  sessionId String?  @map("id_session")
-
-  note   Note?   @relation(fields: [noteId], references: [id])
-  noteId String? @map("id_note")
-
+  session    Session?  @relation(fields: [sessionId], references: [id])
+  sessionId  String?   @map("id_session")
+  note       Note?     @relation(fields: [noteId], references: [id])
+  noteId     String?   @map("id_note")
   ensemble   Ensemble? @relation(fields: [ensembleId], references: [id])
   ensembleId Int?      @map("id_ensemble")
-
-  objet   Objet?  @relation(fields: [objetId], references: [id])
-  objetId String? @map("id_objet")
+  objet      Objet?    @relation(fields: [objetId], references: [id])
+  objetId    String?   @map("id_objet")
 
   publiePar   User   @relation(fields: [publieParId], references: [id])
-  publieParId String @map("id_user")
+  publieParId String @map("id_publicateur")
 
   detailsAstrophoto Details_Astrophoto?
+
+  publications Publication[] // publications qui référencent cette photo
 
   contenu   Contenu @relation(fields: [contenuId], references: [id])
   contenuId Int     @unique @map("id_contenu")
@@ -347,6 +350,33 @@ model Photo {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("photo")
+}
+
+model Publication {
+  id    String  @id @default(uuid()) @map("id_publication")
+  texte String?
+
+  auteur   User   @relation(fields: [auteurId], references: [id])
+  auteurId String @map("id_auteur")
+
+  // Une seule des trois peut être renseignée à la fois (règle applicative,
+  // pas une contrainte du schéma) — doit appartenir à l'auteur
+  photo     Photo?   @relation(fields: [photoId], references: [id])
+  photoId   String?  @map("id_photo")
+  note      Note?    @relation(fields: [noteId], references: [id])
+  noteId    String?  @map("id_note")
+  croquis   Croquis? @relation(fields: [croquisId], references: [id])
+  croquisId Int?     @map("id_croquis")
+
+  contenu   Contenu @relation(fields: [contenuId], references: [id])
+  contenuId Int     @unique @map("id_contenu")
+
+  mentions Mention_Utilisateur[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("publication")
 }
 
 model Objet {
@@ -390,18 +420,16 @@ model Evenement_Astro {
   @@map("evenement_astro")
 }
 
-// =====================================================================================================================
-// Int/autoincrement : tables internes, jamais leur propre URL
-// =====================================================================================================================
+// --- Int/autoincrement : tables internes, jamais leur propre URL --------
+
 model Participation {
   id Int @id @default(autoincrement()) @map("id_participation")
 
   statut   Statut_Participation @relation(fields: [statutId], references: [id])
   statutId Int                  @map("id_statut_participation")
 
-  user   User   @relation(fields: [userId], references: [id])
-  userId String @map("id_user")
-
+  user      User    @relation(fields: [userId], references: [id])
+  userId    String  @map("id_user")
   session   Session @relation(fields: [sessionId], references: [id])
   sessionId String  @map("id_session")
 
@@ -419,8 +447,8 @@ model Lieu {
   proprietaire   User   @relation(fields: [proprietaireId], references: [id])
   proprietaireId String @map("id_proprietaire")
 
-  sessionParDefaut Session[]
-  notes            Note[]
+  sessionsParDefaut Session[]
+  notes             Note[]
 
   @@map("lieu")
 }
@@ -466,7 +494,6 @@ model Ensemble_Materiel {
 
   ensemble   Ensemble @relation(fields: [ensembleId], references: [id])
   ensembleId Int      @map("id_ensemble")
-
   materiel   Materiel @relation(fields: [materielId], references: [id])
   materielId Int      @map("id_materiel")
 
@@ -485,6 +512,8 @@ model Croquis {
 
   note   Note   @relation(fields: [noteId], references: [id])
   noteId String @map("id_note")
+
+  publications Publication[] // publications qui référencent ce croquis
 
   @@map("croquis")
 }
@@ -543,7 +572,7 @@ model Caracteristique_Objet {
   typeId Int                  @map("id_type_caracteristique")
 
   valeur String
-  unite  String? // surcharge uniteParDefaut si besoin (ex: parsecs plutôt qu'années-lumière)
+  unite  String? // surcharge uniteParDefaut si besoin (ex. parsecs plutôt qu'années-lumière)
 
   @@unique([objetId, typeId])
   @@map("caracteristique_objet")
@@ -559,9 +588,10 @@ model Contenu {
 
   datePublication DateTime? @map("date_publication")
 
-  session Session?
-  note    Note?
-  photo   Photo?
+  session     Session?
+  note        Note?
+  photo       Photo?
+  publication Publication?
 
   commentaires  Commentaire[]
   mentionsJaime Mention_Jaime[]
@@ -580,6 +610,13 @@ model Commentaire {
   contenu   Contenu @relation(fields: [contenuId], references: [id])
   contenuId Int     @map("id_contenu")
 
+  // Fil de réponses : NULL = commentaire de premier niveau, renseigné = réponse
+  parent   Commentaire?  @relation("ReponseCommentaire", fields: [parentId], references: [id])
+  parentId Int?          @map("id_commentaire_parent")
+  reponses Commentaire[] @relation("ReponseCommentaire")
+
+  mentions Mention_Utilisateur[]
+
   @@map("commentaire")
 }
 
@@ -594,6 +631,23 @@ model Mention_Jaime {
 
   @@unique([userId, contenuId])
   @@map("mention_jaime")
+}
+
+model Mention_Utilisateur {
+  id        Int      @id @default(autoincrement()) @map("id_mention_utilisateur")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  utilisateurMentionne   User   @relation(fields: [utilisateurMentionneId], references: [id])
+  utilisateurMentionneId String @map("id_utilisateur_mentionne")
+
+  // Une seule des deux renseignée à la fois (règle applicative, pas une
+  // contrainte du schéma) — même logique que les FK optionnelles de Publication
+  commentaire   Commentaire? @relation(fields: [commentaireId], references: [id])
+  commentaireId Int?         @map("id_commentaire")
+  publication   Publication? @relation(fields: [publicationId], references: [id])
+  publicationId String?      @map("id_publication")
+
+  @@map("mention_utilisateur")
 }
 
 model Tag {

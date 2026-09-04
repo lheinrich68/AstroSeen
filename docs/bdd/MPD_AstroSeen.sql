@@ -1,11 +1,11 @@
--- MPD // AstroSeen
+-- MPD — AstroSeen
 -- Modèle physique de données, PostgreSQL. Dérivé du MLD (mld_astroseen.md).
 -- Toutes les dates/heures en TIMESTAMPTZ (pas TIMESTAMP) : une session peut
 -- traverser minuit ou s'étaler sur plusieurs nuits, le fuseau horaire compte.
 --
 -- Stratégie de clés primaires :
 --   UUID      -> entités adressables directement (URL publique/partageable) :
---                utilisateur, session, note, photo, objet, evenement_astro
+--                "user", session, note, photo, objet, evenement_astro
 --   SERIAL    -> tables internes/techniques, jamais consultées via leur
 --                propre URL : toutes les autres
 --
@@ -38,9 +38,9 @@ CREATE TABLE niveau_experience (
     libelle               TEXT NOT NULL
 );
 
-CREATE TABLE role_plateforme (
-    id_role_plateforme  SERIAL PRIMARY KEY,
-    libelle             TEXT NOT NULL
+CREATE TABLE role (
+    id_role SERIAL PRIMARY KEY,
+    libelle TEXT NOT NULL
 );
 
 CREATE TABLE etat_compte (
@@ -154,11 +154,10 @@ VALUES
     ('Confirmé'),
     ('Expert');
 
-INSERT INTO role_plateforme (libelle)
-VALUES
-    ('Membre'),
-    ('Modérateur'),
-    ('Administrateur');
+INSERT INTO role (libelle)
+VALUES ('Membre'),
+       ('Modérateur'),
+       ('Administrateur');
 
 INSERT INTO etat_compte (libelle)
 VALUES
@@ -227,8 +226,7 @@ VALUES
     ('Satellite'),
     ('Autre');
 
-INSERT INTO type_caracteristique (libelle, unite_par_defaut)
-VALUES
+INSERT INTO type_caracteristique (libelle, unite_par_defaut) VALUES
     ('Magnitude apparente', 'mag'),
     ('Distance', 'al'),
     ('Taille apparente', 'arcmin'),
@@ -254,7 +252,8 @@ INSERT INTO type_contenu (libelle)
 VALUES
     ('Session'),
     ('Note'),
-    ('Photo');
+    ('Photo'),
+    ('Publication');
 
 INSERT INTO visibilite_contenu (libelle)
 VALUES
@@ -279,55 +278,55 @@ VALUES
     ('Haute');
 
 -- ---------------------------------------------------------------------------
--- Utilisateur (UUID => profil consultable directement)
+-- User (UUID => profil consultable directement)
 -- ---------------------------------------------------------------------------
 
-CREATE TABLE utilisateur (
-    id_utilisateur               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    pseudo                       TEXT NOT NULL UNIQUE,
-    email                        TEXT NOT NULL UNIQUE,
-    mot_de_passe_hash            TEXT NOT NULL,
-    nom_affiche                  TEXT,
-    bio                          TEXT,
-    id_statut_utilisateur        BIGINT NOT NULL REFERENCES statut_utilisateur(id_statut_utilisateur),
-    id_niveau_experience         BIGINT NOT NULL REFERENCES niveau_experience(id_niveau_experience),
-    id_role_plateforme           BIGINT NOT NULL REFERENCES role_plateforme(id_role_plateforme),
-    astronome_certifie           BOOLEAN NOT NULL DEFAULT FALSE,
-    id_certificateur             UUID REFERENCES utilisateur(id_utilisateur),
-    date_certification           TIMESTAMPTZ,
-    consentement_cgu_date        TIMESTAMPTZ,
-    date_derniere_connexion      TIMESTAMPTZ,
-    id_etat_compte               BIGINT NOT NULL REFERENCES etat_compte(id_etat_compte),
-    photo_profil                 TEXT,
-    email_verifie                BOOLEAN NOT NULL DEFAULT FALSE,
-    token_verification_email     TEXT,
-    date_expiration_token        TIMESTAMPTZ,
-    date_verification_email      TIMESTAMPTZ,
-    token_reinitialisation_mdp   TEXT, -- distinct du token de vérification email, volontairement
-    date_expiration_token_reset  TIMESTAMPTZ,
-    date_demande_suppression     TIMESTAMPTZ, -- file d'attente admin : renseignée tant que etat_compte reste 'actif'
-    created_at                   TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at                   TIMESTAMPTZ NOT NULL DEFAULT now()
+CREATE TABLE "user" (
+    id_user                     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    pseudo                      TEXT NOT NULL UNIQUE,
+    email                       TEXT NOT NULL UNIQUE,
+    hashed_password             TEXT NOT NULL,
+    nom_affiche                 TEXT,
+    bio                         TEXT,
+    id_statut_utilisateur       INT NOT NULL REFERENCES statut_utilisateur(id_statut_utilisateur),
+    id_niveau_experience        INT NOT NULL REFERENCES niveau_experience(id_niveau_experience),
+    id_role                     INT NOT NULL REFERENCES role(id_role),
+    astronome_certifie          BOOLEAN NOT NULL DEFAULT FALSE,
+    id_certificateur            UUID REFERENCES "user"(id_user),
+    date_certification          TIMESTAMPTZ,
+    consentement_cgu_date       TIMESTAMPTZ,
+    date_derniere_connexion     TIMESTAMPTZ,
+    id_etat_compte              INT NOT NULL REFERENCES etat_compte(id_etat_compte),
+    photo_profil                TEXT,
+    email_verifie               BOOLEAN NOT NULL DEFAULT FALSE,
+    token_verification_email    TEXT,
+    date_expiration_token       TIMESTAMPTZ,
+    date_verification_email     TIMESTAMPTZ,
+    token_reinitialisation_mdp  TEXT, -- distinct du token de vérification email, volontairement
+    date_expiration_token_reset TIMESTAMPTZ,
+    date_demande_suppression    TIMESTAMPTZ, -- file d'attente admin : renseignée tant que etat_compte reste 'actif'
+    created_at                  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at                  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_utilisateur_statut ON utilisateur(id_statut_utilisateur);
-CREATE INDEX idx_utilisateur_niveau ON utilisateur(id_niveau_experience);
-CREATE INDEX idx_utilisateur_role ON utilisateur(id_role_plateforme);
-CREATE INDEX idx_utilisateur_etat ON utilisateur(id_etat_compte);
+CREATE INDEX idx_utilisateur_statut ON "user"(id_statut_utilisateur);
+CREATE INDEX idx_utilisateur_niveau ON "user"(id_niveau_experience);
+CREATE INDEX idx_utilisateur_role ON "user"(id_role);
+CREATE INDEX idx_utilisateur_etat ON "user"(id_etat_compte);
 
 CREATE TRIGGER trg_utilisateur_updated_at
-    BEFORE UPDATE ON utilisateur
+    BEFORE UPDATE ON "user"
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- ---------------------------------------------------------------------------
--- Contenu (SERIAL => technique, jamais consulté via sa propre URL)
+-- Contenu (SERIAL — technique, jamais consulté via sa propre URL)
 -- créé avant Session/Note/Photo car référencé par elles
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE contenu (
     id_contenu             SERIAL PRIMARY KEY,
-    id_type_contenu        BIGINT NOT NULL REFERENCES type_contenu(id_type_contenu),
-    id_visibilite_contenu  BIGINT NOT NULL REFERENCES visibilite_contenu(id_visibilite_contenu),
+    id_type_contenu        INT NOT NULL REFERENCES type_contenu(id_type_contenu),
+    id_visibilite_contenu  INT NOT NULL REFERENCES visibilite_contenu(id_visibilite_contenu),
     date_publication       TIMESTAMPTZ
 );
 
@@ -339,12 +338,12 @@ CREATE INDEX idx_contenu_visibilite ON contenu(id_visibilite_contenu);
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE lieu (
-    id_lieu          SERIAL PRIMARY KEY,
-    nom              TEXT NOT NULL,
-    latitude         DOUBLE PRECISION NOT NULL,
-    longitude        DOUBLE PRECISION NOT NULL,
-    bortle           INTEGER,
-    id_proprietaire  UUID NOT NULL REFERENCES utilisateur(id_utilisateur)
+    id_lieu         SERIAL PRIMARY KEY,
+    nom             TEXT NOT NULL,
+    latitude        DOUBLE PRECISION NOT NULL,
+    longitude       DOUBLE PRECISION NOT NULL,
+    bortle          INTEGER,
+    id_proprietaire UUID NOT NULL REFERENCES "user"(id_user)
 );
 
 CREATE INDEX idx_lieu_proprietaire ON lieu(id_proprietaire);
@@ -363,12 +362,12 @@ CREATE TABLE session (
     date_debut                   DATE NOT NULL,
     heure_debut                  TIME,
     date_fin                     DATE,
-    id_statut_session            BIGINT NOT NULL REFERENCES statut_session(id_statut_session),
-    id_visibilite_participation  BIGINT NOT NULL REFERENCES visibilite_participation(id_visibilite_participation),
-    id_type_session              BIGINT REFERENCES type_session(id_type_session),
-    id_createur                  UUID NOT NULL REFERENCES utilisateur(id_utilisateur),
-    id_lieu_par_defaut           BIGINT REFERENCES lieu(id_lieu),
-    id_contenu                   BIGINT NOT NULL UNIQUE REFERENCES contenu(id_contenu),
+    id_statut_session            INT NOT NULL REFERENCES statut_session(id_statut_session),
+    id_visibilite_participation  INT NOT NULL REFERENCES visibilite_participation(id_visibilite_participation),
+    id_type_session              INT REFERENCES type_session(id_type_session),
+    id_createur                  UUID NOT NULL REFERENCES "user"(id_user),
+    id_lieu_par_defaut           INT REFERENCES lieu(id_lieu),
+    id_contenu                   INT NOT NULL UNIQUE REFERENCES contenu(id_contenu),
     created_at                   TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at                   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -383,33 +382,33 @@ CREATE INDEX idx_session_statut ON session(id_statut_session);
 
 CREATE TABLE participation (
     id_participation         SERIAL PRIMARY KEY,
-    id_statut_participation  BIGINT NOT NULL REFERENCES statut_participation(id_statut_participation),
-    id_utilisateur           UUID NOT NULL REFERENCES utilisateur(id_utilisateur),
+    id_statut_participation  INT NOT NULL REFERENCES statut_participation(id_statut_participation),
+    id_user                  UUID NOT NULL REFERENCES "user"(id_user),
     id_session               UUID NOT NULL REFERENCES session(id_session),
 
-    UNIQUE (id_utilisateur, id_session)
+    UNIQUE (id_user, id_session)
 );
 
 -- ---------------------------------------------------------------------------
--- Ensemble / Matériel (SERIAL -> internes)
+-- Ensemble / Matériel (SERIAL — internes)
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE ensemble (
-    id_ensemble            SERIAL PRIMARY KEY,
-    nom                    TEXT NOT NULL,
-    id_categorie_ensemble  BIGINT NOT NULL REFERENCES categorie_ensemble(id_categorie_ensemble),
-    id_proprietaire        UUID NOT NULL REFERENCES utilisateur(id_utilisateur)
+    id_ensemble           SERIAL PRIMARY KEY,
+    nom                   TEXT NOT NULL,
+    id_categorie_ensemble INT NOT NULL REFERENCES categorie_ensemble(id_categorie_ensemble),
+    id_proprietaire       UUID NOT NULL REFERENCES "user"(id_user)
 );
 
 CREATE INDEX idx_ensemble_proprietaire ON ensemble(id_proprietaire);
 CREATE INDEX idx_ensemble_categorie ON ensemble(id_categorie_ensemble);
 
 CREATE TABLE materiel (
-    id_materiel       SERIAL PRIMARY KEY,
-    id_type_materiel  BIGINT NOT NULL REFERENCES type_materiel(id_type_materiel),
-    marque            TEXT,
-    modele            TEXT,
-    caracteristiques  TEXT,
+    id_materiel      SERIAL PRIMARY KEY,
+    id_type_materiel INT NOT NULL REFERENCES type_materiel(id_type_materiel),
+    marque           TEXT,
+    modele           TEXT,
+    caracteristiques TEXT,
 
     UNIQUE (id_type_materiel, marque, modele)
 );
@@ -417,9 +416,9 @@ CREATE TABLE materiel (
 CREATE INDEX idx_materiel_type ON materiel(id_type_materiel);
 
 CREATE TABLE ensemble_materiel (
-    id_ensemble_materiel  SERIAL PRIMARY KEY,
-    id_ensemble           BIGINT NOT NULL REFERENCES ensemble(id_ensemble),
-    id_materiel           BIGINT NOT NULL REFERENCES materiel(id_materiel),
+    id_ensemble_materiel SERIAL PRIMARY KEY,
+    id_ensemble          INT NOT NULL REFERENCES ensemble(id_ensemble),
+    id_materiel          INT NOT NULL REFERENCES materiel(id_materiel),
 
     UNIQUE (id_ensemble, id_materiel)
 );
@@ -450,8 +449,8 @@ CREATE TRIGGER trg_cleanup_materiel_orphelin
 
 CREATE TABLE objet (
     id_objet                        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    nom                             TEXT NOT NULL,
-    id_classification_astronomique  BIGINT NOT NULL REFERENCES classification_astronomique(id_classification_astronomique),
+    nom                              TEXT NOT NULL,
+    id_classification_astronomique  INT NOT NULL REFERENCES classification_astronomique(id_classification_astronomique),
     description                     TEXT,
     histoire                        TEXT,
     image_reference                 TEXT -- image de couverture officielle/admin, distincte des Photo communautaires
@@ -460,10 +459,10 @@ CREATE TABLE objet (
 CREATE INDEX idx_objet_classification ON objet(id_classification_astronomique);
 
 CREATE TABLE designation (
-    id_designation  SERIAL PRIMARY KEY,
-    catalogue       TEXT NOT NULL,
-    code            TEXT NOT NULL,
-    id_objet        UUID NOT NULL REFERENCES objet(id_objet),
+    id_designation SERIAL PRIMARY KEY,
+    catalogue      TEXT NOT NULL,
+    code           TEXT NOT NULL,
+    id_objet       UUID NOT NULL REFERENCES objet(id_objet),
 
     UNIQUE (catalogue, code)
 );
@@ -474,11 +473,11 @@ CREATE INDEX idx_designation_objet ON designation(id_objet);
 -- par caractéristique, nombre illimité et variable selon le type d'objet
 -- (une planète et une galaxie n'ont pas les mêmes caractéristiques pertinentes).
 CREATE TABLE caracteristique_objet (
-    id_caracteristique_objet  SERIAL PRIMARY KEY,
-    id_objet                  UUID NOT NULL REFERENCES objet(id_objet),
-    id_type_caracteristique   BIGINT NOT NULL REFERENCES type_caracteristique(id_type_caracteristique),
-    valeur                    TEXT NOT NULL,
-    unite                     TEXT, -- surcharge unite_par_defaut si besoin (ex: valeur en parsecs plutôt qu'années-lumière)
+    id_caracteristique_objet SERIAL PRIMARY KEY,
+    id_objet                 UUID NOT NULL REFERENCES objet(id_objet),
+    id_type_caracteristique  INT NOT NULL REFERENCES type_caracteristique(id_type_caracteristique),
+    valeur                   TEXT NOT NULL,
+    unite                    TEXT, -- surcharge unite_par_defaut si besoin (ex. valeur en parsecs plutôt qu'années-lumière)
 
     UNIQUE (id_objet, id_type_caracteristique)
 );
@@ -486,7 +485,7 @@ CREATE TABLE caracteristique_objet (
 CREATE INDEX idx_caracteristique_objet_objet ON caracteristique_objet(id_objet);
 
 -- ---------------------------------------------------------------------------
--- Note d'observation (UUID -> publiable/partageable) / Croquis (SERIAL)
+-- Note d'observation (UUID — publiable/partageable) / Croquis (SERIAL)
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE note (
@@ -497,7 +496,7 @@ CREATE TABLE note (
     temperature                 DOUBLE PRECISION,
     humidite                    DOUBLE PRECISION,
     pression                    DOUBLE PRECISION,
-    id_meteo                    BIGINT REFERENCES meteo(id_meteo),
+    id_meteo                    INT REFERENCES meteo(id_meteo),
     evenements_imprevus         TEXT,
     recit                       TEXT, -- rédaction longue façon Notion (Markdown), rendu riche géré côté frontend
     ascension_droite            DOUBLE PRECISION,
@@ -507,11 +506,11 @@ CREATE TABLE note (
     heure_debut                 TIMESTAMPTZ,
     heure_fin                   TIMESTAMPTZ,
     id_session                  UUID NOT NULL REFERENCES session(id_session),
-    id_redacteur                UUID NOT NULL REFERENCES utilisateur(id_utilisateur),
-    id_lieu                     BIGINT REFERENCES lieu(id_lieu),
-    id_ensemble                 BIGINT REFERENCES ensemble(id_ensemble),
+    id_redacteur                UUID NOT NULL REFERENCES "user"(id_user),
+    id_lieu                     INT REFERENCES lieu(id_lieu),
+    id_ensemble                 INT REFERENCES ensemble(id_ensemble),
     id_objet                    UUID REFERENCES objet(id_objet),
-    id_contenu                  BIGINT NOT NULL UNIQUE REFERENCES contenu(id_contenu),
+    id_contenu                  INT NOT NULL UNIQUE REFERENCES contenu(id_contenu),
     created_at                  TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at                  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -526,30 +525,30 @@ CREATE TRIGGER trg_note_updated_at
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 CREATE TABLE croquis (
-    id_croquis         SERIAL PRIMARY KEY,
-    image              TEXT NOT NULL,
-    id_source_croquis  BIGINT NOT NULL REFERENCES source_croquis(id_source_croquis),
-    date_creation      TIMESTAMPTZ NOT NULL DEFAULT now(),
-    id_note            UUID NOT NULL REFERENCES note(id_note)
+    id_croquis        SERIAL PRIMARY KEY,
+    image             TEXT NOT NULL,
+    id_source_croquis INT NOT NULL REFERENCES source_croquis(id_source_croquis),
+    date_creation     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    id_note           UUID NOT NULL REFERENCES note(id_note)
 );
 
 CREATE INDEX idx_croquis_note ON croquis(id_note);
 
 -- ---------------------------------------------------------------------------
--- Photo (UUID -> publiable/partageable) / Astrophoto (SERIAL)
+-- Photo (UUID — publiable/partageable) / Astrophoto (SERIAL)
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE photo (
-    id_photo        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    date_prise      TIMESTAMPTZ,
-    id_session      UUID REFERENCES session(id_session),
-    id_note         UUID REFERENCES note(id_note),
-    id_ensemble     BIGINT REFERENCES ensemble(id_ensemble),
-    id_objet        UUID REFERENCES objet(id_objet),
-    id_publicateur  UUID NOT NULL REFERENCES utilisateur(id_utilisateur),
-    id_contenu      BIGINT NOT NULL UNIQUE REFERENCES contenu(id_contenu),
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+    id_photo       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    date_prise     TIMESTAMPTZ,
+    id_session     UUID REFERENCES session(id_session),
+    id_note        UUID REFERENCES note(id_note),
+    id_ensemble    INT REFERENCES ensemble(id_ensemble),
+    id_objet       UUID REFERENCES objet(id_objet),
+    id_publicateur UUID NOT NULL REFERENCES "user"(id_user),
+    id_contenu     INT NOT NULL UNIQUE REFERENCES contenu(id_contenu),
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE INDEX idx_photo_session ON photo(id_session);
@@ -560,62 +559,99 @@ CREATE TRIGGER trg_photo_updated_at
     BEFORE UPDATE ON photo
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
+CREATE TABLE publication (
+    id_publication UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    texte          TEXT,
+    id_auteur      UUID NOT NULL REFERENCES "user"(id_user),
+    id_contenu     INT NOT NULL UNIQUE REFERENCES contenu(id_contenu),
+
+    -- Une seule des trois peut être renseignée à la fois (règle applicative,
+    -- pas un CHECK SQL) — et doit appartenir à l'auteur de la publication
+
+    id_photo       UUID REFERENCES photo(id_photo),
+    id_note        UUID REFERENCES note(id_note),
+    id_croquis     INT REFERENCES croquis(id_croquis),
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_publication_auteur ON publication(id_auteur);
+
+CREATE TRIGGER trg_publication_updated_at
+    BEFORE UPDATE ON publication
+    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
 CREATE TABLE details_astrophoto (
-    id_details_astrophoto  SERIAL PRIMARY KEY,
-    gain_iso               TEXT,
-    ouverture              DOUBLE PRECISION,
-    focale_effective       DOUBLE PRECISION,
-    nombre_darks           INTEGER,
-    nombre_bias            INTEGER,
-    logiciel_acquisition   TEXT,
-    logiciel_traitement    TEXT,
-    methode_empilement     TEXT,
-    id_photo               UUID NOT NULL UNIQUE REFERENCES photo(id_photo)
+    id_details_astrophoto SERIAL PRIMARY KEY,
+    gain_iso              TEXT,
+    ouverture             DOUBLE PRECISION,
+    focale_effective      DOUBLE PRECISION,
+    nombre_darks          INTEGER,
+    nombre_bias           INTEGER,
+    logiciel_acquisition  TEXT,
+    logiciel_traitement   TEXT,
+    methode_empilement    TEXT,
+    id_photo              UUID NOT NULL UNIQUE REFERENCES photo(id_photo)
 );
 
 CREATE TABLE acquisition_filtre (
-    id_acquisition_filtre  SERIAL PRIMARY KEY,
-    filtre                 TEXT NOT NULL,
-    temps_pose             DOUBLE PRECISION,
-    nombre_poses           INTEGER,
-    nombre_flats           INTEGER,
-    id_details_astrophoto  BIGINT NOT NULL REFERENCES details_astrophoto(id_details_astrophoto)
+    id_acquisition_filtre SERIAL PRIMARY KEY,
+    filtre                TEXT NOT NULL,
+    temps_pose            DOUBLE PRECISION,
+    nombre_poses          INTEGER,
+    nombre_flats          INTEGER,
+    id_details_astrophoto INT NOT NULL REFERENCES details_astrophoto(id_details_astrophoto)
 );
 
 CREATE INDEX idx_acquisition_filtre_details ON acquisition_filtre(id_details_astrophoto);
 
 -- ---------------------------------------------------------------------------
--- Interactions communautaires (SERIAL -> internes, jamais leur propre URL)
+-- Interactions communautaires (SERIAL — internes, jamais leur propre URL)
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE commentaire (
-    id_commentaire  SERIAL PRIMARY KEY,
-    texte           TEXT NOT NULL,
-    date            TIMESTAMPTZ NOT NULL DEFAULT now(),
-    id_auteur       UUID NOT NULL REFERENCES utilisateur(id_utilisateur),
-    id_contenu      BIGINT NOT NULL REFERENCES contenu(id_contenu)
+    id_commentaire      SERIAL PRIMARY KEY,
+    texte               TEXT NOT NULL,
+    date                TIMESTAMPTZ NOT NULL DEFAULT now(),
+    id_auteur           UUID NOT NULL REFERENCES "user"(id_user),
+    id_contenu          INT NOT NULL REFERENCES contenu(id_contenu),
+
+    -- NULL = commentaire de premier niveau ; renseigné = réponse (fil de discussion)
+    id_commentaire_parent INT REFERENCES commentaire(id_commentaire)
 );
 
 CREATE INDEX idx_commentaire_contenu ON commentaire(id_contenu);
+CREATE INDEX idx_commentaire_parent ON commentaire(id_commentaire_parent);
 
 CREATE TABLE mention_jaime (
-    id_mention_jaime  SERIAL PRIMARY KEY,
-    date              TIMESTAMPTZ NOT NULL DEFAULT now(),
-    id_utilisateur    UUID NOT NULL REFERENCES utilisateur(id_utilisateur),
-    id_contenu        BIGINT NOT NULL REFERENCES contenu(id_contenu),
+    id_mention_jaime SERIAL PRIMARY KEY,
+    date             TIMESTAMPTZ NOT NULL DEFAULT now(),
+    id_user   UUID NOT NULL REFERENCES "user"(id_user),
+    id_contenu       INT NOT NULL REFERENCES contenu(id_contenu),
 
-    UNIQUE (id_utilisateur, id_contenu)
+    UNIQUE (id_user, id_contenu)
 );
 
+CREATE TABLE mention_utilisateur (
+    id_mention_utilisateur    SERIAL PRIMARY KEY,
+    created_at                TIMESTAMPTZ NOT NULL DEFAULT now(),
+    id_utilisateur_mentionne  UUID NOT NULL REFERENCES "user"(id_user),
+    -- Une seule des deux renseignée à la fois (règle applicative, pas un CHECK SQL)
+    id_commentaire            INT REFERENCES commentaire(id_commentaire),
+    id_publication            UUID REFERENCES publication(id_publication)
+);
+
+CREATE INDEX idx_mention_utilisateur_mentionne ON mention_utilisateur(id_utilisateur_mentionne);
+
 CREATE TABLE tag (
-    id_tag  SERIAL PRIMARY KEY,
-    nom     TEXT NOT NULL UNIQUE
+    id_tag SERIAL PRIMARY KEY,
+    nom    TEXT NOT NULL UNIQUE
 );
 
 CREATE TABLE association_tag (
-    id_association_tag  SERIAL PRIMARY KEY,
-    id_tag              BIGINT NOT NULL REFERENCES tag(id_tag),
-    id_contenu          BIGINT NOT NULL REFERENCES contenu(id_contenu),
+    id_association_tag SERIAL PRIMARY KEY,
+    id_tag             INT NOT NULL REFERENCES tag(id_tag),
+    id_contenu         INT NOT NULL REFERENCES contenu(id_contenu),
 
     UNIQUE (id_tag, id_contenu)
 );
@@ -623,7 +659,7 @@ CREATE TABLE association_tag (
 CREATE INDEX idx_association_tag_contenu ON association_tag(id_contenu);
 
 -- ---------------------------------------------------------------------------
--- Calendrier => événements astronomiques (UUID -> page calendrier publique)
+-- Calendrier — événements astronomiques (UUID — page calendrier publique)
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE evenement_astro (
@@ -632,10 +668,10 @@ CREATE TABLE evenement_astro (
     description                     TEXT,
     date_debut                      TIMESTAMPTZ NOT NULL,
     date_fin                        TIMESTAMPTZ,
-    id_type_evenement_astro         BIGINT NOT NULL REFERENCES type_evenement_astro(id_type_evenement_astro),
-    id_niveau_importance_evenement  BIGINT NOT NULL REFERENCES niveau_importance_evenement(id_niveau_importance_evenement),
+    id_type_evenement_astro         INT NOT NULL REFERENCES type_evenement_astro(id_type_evenement_astro),
+    id_niveau_importance_evenement  INT NOT NULL REFERENCES niveau_importance_evenement(id_niveau_importance_evenement),
     id_objet                        UUID REFERENCES objet(id_objet),
-    id_createur                     UUID NOT NULL REFERENCES utilisateur(id_utilisateur)
+    id_createur                     UUID NOT NULL REFERENCES "user"(id_user)
 );
 
 CREATE INDEX idx_evenement_astro_objet ON evenement_astro(id_objet);

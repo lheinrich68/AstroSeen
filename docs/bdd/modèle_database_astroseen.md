@@ -20,7 +20,7 @@ La v1 n'ayant jamais été mise en production, cette révision corrige aussi dir
 - `bio` (optionnel)
 - rattaché à un `Statut utilisateur` (table de référence — voir ci-dessous)
 - rattaché à un `Niveau d'expérience` (table de référence — voir ci-dessous)
-- rattaché à un `Rôle plateforme` (table de référence — voir ci-dessous)
+- rattaché à un `Role` (table de référence — voir ci-dessous)
 - `astronome_certifie` (bool) — badge de distinction accordé par un administrateur, sans droit particulier associé (ni validation de contenu, ni permission supplémentaire) : il sert uniquement à distinguer visiblement ces profils des autres utilisateurs.
 - `certifie_par` (optionnel — référence vers l'utilisateur admin ayant accordé le statut)
 - `date_certification` (optionnel)
@@ -43,10 +43,10 @@ Décision transversale : **aucun type énuméré** (enum PostgreSQL/Prisma) dans
 
 | Table | Rattachée à | Valeurs de départ | Éditable via le panel admin |
 |---|---|---|---|
-| Statut utilisateur | Utilisateur | Amateur, Professionnel | Oui |
-| Niveau d'expérience | Utilisateur | Débutant, Confirmé, Expert | Oui |
-| Rôle plateforme | Utilisateur | Membre, Modérateur, Administrateur | **Non** — pilote les permissions codées en dur |
-| Etat compte | Utilisateur | Actif, Banni, Supprimé | Oui |
+| Statut utilisateur | User | Amateur, Professionnel | Oui |
+| Niveau d'expérience | User | Débutant, Confirmé, Expert | Oui |
+| Role | User | Membre, Modérateur, Administrateur | **Non** — pilote les permissions codées en dur |
+| Etat compte | User | Actif, Banni, Supprimé | Oui |
 | Visibilité participation | Session | Publique, Privée, Sur invitation | Oui |
 | Type session | Session (optionnel) | Loisir, Campagne, Formation | **Non** |
 | Statut session | Session | Planifiée, En cours, Terminée, Annulée | **Non** — pilote probablement une machine à états côté backend |
@@ -56,13 +56,13 @@ Décision transversale : **aucun type énuméré** (enum PostgreSQL/Prisma) dans
 | Classification astronomique | Objet | Étoile, Étoile variable, Planète, Planète naine, Comète, Astéroïde, Galaxie, Nébuleuse, Amas ouvert, Amas globulaire, Étoile à neutrons, Supernova, Reste de supernova, Satellite, Autre | Oui |
 | Type caractéristique | Caractéristique objet | Magnitude apparente, Distance, Taille apparente, Constellation, Type spectral, Type morphologique, Période orbitale, Redshift, Vitesse radiale, Masse, Rayon, Température de surface, Ascension droite (catalogue), Déclinaison (catalogue), Autre | Oui |
 | Source croquis | Croquis | Importé, Dessiné | Oui |
-| Type contenu | Contenu | Session, Note, Photo | Oui |
+| Type contenu | Contenu | Session, Note, Photo, Publication | Oui |
 | Visibilité contenu | Contenu | Privée, Publique | Oui |
 | Type événement astro | Événement astronomique | Éclipse, Pluie de météores, Opposition, Conjonction, Transit, Occultation, Autre | Oui |
 | Niveau importance événement | Événement astronomique | Majeur, Mineur | Oui |
 | Météo | Note | Dégagé, Partiellement nuageux, Nuageux, Couvert, Brumeux, Pluie, Vent fort, Orageux, Autre | **Non** |
 
-**Tables verrouillées (non éditables via le panel admin)** : `Rôle plateforme`, `Type session`, `Statut session`, `Météo`. Ces tables sont référencées par de la logique applicative codée en dur (vérifications de permission, machine à états, taxonomie fixe) — les modifier via une UI générique risquerait de désynchroniser le code et les données plutôt que d'apporter une vraie flexibilité. Toute évolution de ces tables passe par le code + une migration, pas par le panel admin.
+**Tables verrouillées (non éditables via le panel admin)** : `Role`, `Type session`, `Statut session`, `Météo`. Ces tables sont référencées par de la logique applicative codée en dur (vérifications de permission, machine à états, taxonomie fixe) — les modifier via une UI générique risquerait de désynchroniser le code et les données plutôt que d'apporter une vraie flexibilité. Toute évolution de ces tables passe par le code + une migration, pas par le panel admin.
 
 ### Compte banni ou supprimé -> anonymisation plutôt que suppression en cascade
 Résout le point resté ouvert en section 9.3 du cahier des charges. Plutôt que de supprimer ou réassigner les notes/photos/sessions/commentaires d'un utilisateur banni ou supprimé (ce qui casserait l'historique des autres participants et forcerait à toucher sept tables différentes qui référencent `Utilisateur`), le contenu **reste lié à la même ligne `Utilisateur`** — c'est l'état de ce compte qui change, et l'affichage « Utilisateur anonyme » est dérivé de cet état à la lecture, pas stocké nulle part ailleurs.
@@ -73,7 +73,7 @@ Résout le point resté ouvert en section 9.3 du cahier des charges. Plutôt que
 
 **Vérification email — point à trancher côté implémentation** : le compte doit-il être totalement bloqué (impossible de se connecter) tant que `email_verifie = faux`, ou seulement limité dans certaines actions (ex. pas de publication publique avant vérification) ? Pas une question de modèle de données — les deux options utilisent les mêmes champs — mais à décider avant de coder le flux d'inscription/connexion (`AST-19`/`AST-20`).
 
-Aucune modification nécessaire sur `Session`, `Note`, `Photo`, `Commentaire`, `Lieu`, `Ensemble`, `Participation`, `Mention j'aime` ou `Événement astronomique` : leurs relations vers `Utilisateur` ne changent pas, seul l'état de la ligne référencée change.
+Aucune modification nécessaire sur `Session`, `Note`, `Photo`, `Commentaire`, `Lieu`, `Ensemble`, `Participation`, `Mention j'aime` ou `Événement astronomique` : leurs relations vers `User` ne changent pas, seul l'état de la ligne référencée change.
 
 
 ### Session -> étendu
@@ -182,19 +182,33 @@ Trois nouveaux besoins partagent tous la même mécanique : faire progresser une
 Plutôt que de dupliquer trois fois (Session, Note, Photo) les mêmes mécaniques de visibilité, de commentaires, de likes et de tags, on introduit une table technique commune :
 
 **Contenu** (entité technique, pas une notion métier visible par l'utilisateur)
-- rattaché à un `Type contenu` (table de référence : session/note/photo) — dénormalisé sur Contenu, pour filtrer sans jointure supplémentaire
-- rattaché à une `Visibilite contenu` (table de référence : **privée [défaut] / session / publique**) — remplace le champ `visibilite` qui était directement sur `Session`. *Session* est un niveau intermédiaire : concrètement utilisé par `Note` et `Photo` (visible par les participants de la session sans être encore diffusé au fil d'actualité) ; `Session` en tant que type de `Contenu` n'a pas d'usage réel pour cette valeur-là, mais rien n'empêche techniquement de la lui appliquer — c'est une règle d'usage côté applicatif, pas une contrainte du schéma
+- rattaché à un `Type contenu` (table de référence : session/note/photo/publication) — dénormalisé sur Contenu, pour filtrer sans jointure supplémentaire
+- rattaché à une `Visibilite contenu` (table de référence : **privée [défaut] / session / publique**) — remplace le champ `visibilite` qui était directement sur `Session`. *Session* est un niveau intermédiaire : concrètement utilisé par `Note` et `Photo` (visible par les participants de la session sans être encore diffusé au fil d'actualité) ; `Session` en tant que type de `Contenu` n'a pas d'usage réel pour cette valeur-là, ni `Publication` d'ailleurs (elle vise directement le fil) — pas une contrainte du schéma, une règle d'usage côté applicatif
 - `date_publication` (optionnel, renseigné au moment du passage en `publique`)
 
-`Session`, `Note` et `Photo` sont chacune reliées en 1-1 à une ligne `Contenu`, créée automatiquement à leur création. `Commentaire`, la nouvelle `Mention j'aime` et le nouveau système de `Tag` se rattachent tous à `Contenu` plutôt qu'à chacune des trois tables séparément.
+`Session`, `Note`, `Photo` et désormais `Publication` sont chacune reliées en 1-1 à une ligne `Contenu`, créée automatiquement à leur création. `Commentaire`, la nouvelle `Mention j'aime` et le nouveau système de `Tag` se rattachent tous à `Contenu` plutôt qu'à chacune des tables séparément.
 
-**Règle de filtrage du fil d'actualité** : seuls les `Contenu` où `visibilite = publique` y apparaissent. Un contenu en `session` reste invisible au fil tant qu'il n'est pas explicitement publié — il n'est visible que par les participants de la session concernée (requête à filtrer côté application : `Contenu.visibilite = publique` pour le fil, vs. `visibilite IN (session, publique)` ET appartenance à la session pour la vue "notes de la session").
+**Publication** (nouvelle entité — le bouton « + » du fil d'actualité) — un post libre, façon réseau social, distinct d'une Note ou d'une Photo : pas rattaché à une Session, pensé pour partager un texte court avec, en option, un contenu déjà existant en pièce jointe.
+- `texte` (texte libre — ce qu'on écrit dans le post)
+- rattaché en 1-1 à un `Contenu` (comme les 3 autres types)
+- rattachée à un `User` auteur
+- rattachée en optionnel à **une seule** des trois : `Photo`, `Note` ou `Croquis` — jamais plusieurs à la fois (contrainte applicative, pas un CHECK SQL, cohérent avec comment on a déjà géré les coordonnées mutuellement exclusives de `Note`)
+- **Règle de propriété** : le contenu attaché doit appartenir à l'auteur de la Publication (`Photo.publie_par` / `Note.redige_par` / `Croquis → Note.redige_par` doit correspondre à l'auteur) — vérifiée côté application à la création, pas dans le schéma
 
-**Commentaire — portée élargie** : se rattache désormais à `Contenu` (donc à une session, une note ou une photo indifféremment) au lieu de `Session` uniquement comme en v1/v2 — cohérent avec le fil d'actualité qui affiche des items individuels commentables.
+**Règle de filtrage du fil d'actualité** : seuls les `Contenu` où `visibilite = publique` y apparaissent. Un contenu en `session` reste invisible au fil tant qu'il n'est pas explicitement publié — il n'est visible que par les participants de la session concernée (requête à filtrer côté application : `Contenu.visibilite = publique` pour le fil, vs. `visibilite IN (session, publique)` ET appartenance à la session pour la vue "notes de la session"). Une `Publication` n'a pas cette étape intermédiaire : elle est écrite puis directement publiée.
+
+
+**Commentaire — portée élargie** : se rattache désormais à `Contenu` (donc à une session, une note, une photo ou une publication indifféremment) au lieu de `Session` uniquement comme en v1/v2 — cohérent avec le fil d'actualité qui affiche des items individuels commentables.
+- **Réponses en fil** : `Commentaire` se rattache en optionnel à un autre `Commentaire` (`commentaire_parent`, auto-référence) — `NULL` pour un commentaire de premier niveau, renseigné pour une réponse. Volontairement limité à un seul niveau de profondeur côté application (une réponse à une réponse s'affiche au même niveau que sa réponse parente) pour éviter un fil illisible à l'infini — c'est une convention d'affichage, pas une contrainte du schéma, qui autorise techniquement une profondeur illimitée.
+
+**Mention utilisateur** (nouvelle) — le `@pseudo` façon Discord, dans un commentaire ou une publication. Nommée `Mention_utilisateur` et non simplement `Mention`, pour ne pas se confondre avec `Mention_jaime` (les likes) qui existe déjà.
+- rattachée à l'`User` mentionné
+- rattachée en optionnel à **un seul** des deux : `Commentaire` ou `Publication` (jamais les deux, contrainte applicative comme pour `Publication` plus haut) — volontairement pas étendue à `Note.recit`, trop coûteux à re-parser dans un champ Markdown long pour un besoin pas exprimé
+- déclenche une notification pour l'utilisateur mentionné (mécanisme de notification pas encore modélisé — à faire au moment de s'y atteler)
 
 **Mention j'aime** (nouvelle)
 - `date`
-- rédigée par un `Utilisateur`, ciblant un `Contenu`
+- rédigée par un `User`, ciblant un `Contenu`
 - contrainte d'unicité (utilisateur, contenu) : un like par personne et par contenu
 
 **Tag** (nouveau)
@@ -208,7 +222,7 @@ Plutôt que de dupliquer trois fois (Session, Note, Photo) les mêmes mécanique
 
 **Croquis** : pas de ligne `Contenu` propre — un croquis suit la visibilité de la `Note` à laquelle il est rattaché, il n'est jamais publié indépendamment.
 
-### Objet -> planétarium (catalogue consultable)
+### Objet — planétarium (catalogue consultable)
 Pour servir de page « fiche objet » consultable librement (façon Pokédex), `Objet` porte :
 - `nom` (nom usuel affiché, ex. *Lune*, *Nébuleuse d'Orion* — distinct des codes de catalogue portés par `Désignation`)
 - `description` (texte — présentation générale, courte)
@@ -219,25 +233,26 @@ Pour servir de page « fiche objet » consultable librement (façon Pokédex), `
 La page « fiche objet » du planétarium affiche les `Photo` où `objet = cet objet` et `Contenu.visibilite = publique`, avec un filtre **Images personnelles / Images communautaires** qui ne fait que distinguer, à l'affichage, les photos dont l'auteur est l'utilisateur connecté de celles publiées par les autres — aucune structure supplémentaire n'est nécessaire, c'est une simple requête filtrée sur les relations déjà existantes (`Photo.publie_par` + `Contenu.visibilite`).
 
 
-### Calendrier -> événements astronomiques
+### Calendrier — événements astronomiques (nouvelle entité)
 Le calendrier combine deux sources bien distinctes, à ne pas mélanger dans une seule table :
 - les **sessions de l'utilisateur** (créées par lui, ou auxquelles il a une `Participation` acceptée) — déjà entièrement modélisées via `Session`/`Participation`, aucune nouvelle structure nécessaire, c'est une simple requête combinée à l'affichage ;
 - les **événements astronomiques** (éclipses, pluies de météores, oppositions planétaires...), qui n'existent pas encore et sont gérés par un administrateur plutôt que par les utilisateurs.
 
-**Événement astronomique**
+**Événement astronomique** (nouvelle entité)
 - `titre`
 - `description`
 - `date_debut`, `date_fin` (optionnel — nul pour un événement ponctuel comme une éclipse, renseigné pour une période comme un pic de pluie de météores)
 - rattaché à un `Type événement astro` (table de référence : éclipse, pluie de météores, opposition planétaire, conjonction, transit, occultation, autre) — comme `Classification_astronomique`, cette table de référence porte un champ `icone_vectorielle` (optionnel) : une icône propre à chaque type, pour l'identifier visuellement au premier coup d'œil (calendrier, panel admin, fiche événement) sans devoir lire le libellé
 - rattaché à un `Niveau importance événement` (table de référence : majeur/mineur), comme demandé — un simple champ de classification, distinct de `Type événement astro`, pour permettre un filtrage grossier sans devoir connaître toutes les catégories
 - rattaché en optionnel à un `Objet` (ex. une opposition de Jupiter pointe vers l'entrée Jupiter du catalogue)
-- créé par un `Utilisateur` — en pratique un `admin`, contrainte appliquée au niveau applicatif plutôt que par le schéma (pas de rôle dédié dans le modèle pour ça, `role_plateforme = admin` suffit)
+- créé par un `User` — en pratique un `admin`, contrainte appliquée au niveau applicatif plutôt que par le schéma (pas de rôle dédié dans le modèle pour ça, `role = admin` suffit)
+
 
 
 ### Signalement et modération de contenu (à implémenter plus tard, via une nouvelle migration)
 
 **Signalement** (nouvelle entité)
-- rattaché à un `Contenu` (ce qui est signalé) et à un `Utilisateur` (qui signale)
+- rattaché à un `Contenu` (ce qui est signalé) et à un `User` (qui signale)
 - rattaché à un `Motif signalement` (table de référence) — valeurs de départ : *Contenu inapproprié*, *Harcèlement*, *Spam*, *Désinformation*, *Contenu illégal*, *Autre*
 - `description` (texte libre, optionnel — précision du signalant)
 - `date_signalement`
@@ -247,7 +262,7 @@ Le calendrier combine deux sources bien distinctes, à ne pas mélanger dans une
 **Visibilite_Contenu** — une 4ᵉ valeur s'ajoute : *Restreinte* (en plus de *Privée*/*Session*/*Publique*, cette dernière déjà une évolution ultérieure — voir plus haut), visible uniquement par le staff et l'auteur du contenu
 
 **Action_Moderation** (nouvelle entité) — trace ce que fait un modérateur **sur un contenu** (pas sur un signalement précis, puisqu'il examine l'ensemble des signalements reçus avant d'agir ; plusieurs actions possibles dans le temps sur un même contenu, ex. restreindre puis republier)
-- rattachée au `Contenu` concerné et à l'`Utilisateur` modérateur qui agit
+- rattachée au `Contenu` concerné et à l'`User` modérateur qui agit
 - rattachée à un `Type action moderation` (table de référence) — valeurs de départ : *Restreindre*, *Demander une modification*, *Valider et republier*, *Supprimer*
 - rattachée en optionnel à un `Motif signalement` (le motif structuré retenu par le staff, réutilise la même table — au choix du modérateur, structuré ou texte libre uniquement)
 - `message` (texte libre) — envoyé à l'auteur : demande de modification détaillée, ou motif de suppression constaté
@@ -263,27 +278,36 @@ Le calendrier combine deux sources bien distinctes, à ne pas mélanger dans une
 
 ```mermaid
 erDiagram
-  UTILISATEUR ||--o{ SESSION : cree
-  UTILISATEUR ||--o{ PARTICIPATION : participe
+  USER ||--o{ SESSION : cree
+  USER ||--o{ PARTICIPATION : participe
   SESSION ||--o{ PARTICIPATION : regroupe
-  UTILISATEUR ||--o{ ENSEMBLE : possede
+  USER ||--o{ ENSEMBLE : possede
   ENSEMBLE ||--o{ ENSEMBLE_MATERIEL : compose_de
   MATERIEL ||--o{ ENSEMBLE_MATERIEL : appartient_a
   TYPE_MATERIEL ||--o{ MATERIEL : categorise
-  UTILISATEUR ||--o{ LIEU : enregistre
+  USER ||--o{ LIEU : enregistre
   LIEU o|--o{ SESSION : lieu_par_defaut
   LIEU o|--o{ NOTE : lieu_precis
-  UTILISATEUR ||--o{ NOTE : redige
-  UTILISATEUR ||--o{ PHOTO : publie
-  UTILISATEUR ||--o{ COMMENTAIRE : ecrit
-  UTILISATEUR ||--o{ MENTION_JAIME : aime
-  UTILISATEUR o|--o{ UTILISATEUR : certifie
+  USER ||--o{ NOTE : redige
+  USER ||--o{ PHOTO : publie
+  USER ||--o{ COMMENTAIRE : ecrit
+  USER ||--o{ MENTION_JAIME : aime
+  USER o|--o{ USER : certifie
   SESSION ||--o{ NOTE : contient
   SESSION ||--o{ PHOTO : contient
   SESSION ||--|| CONTENU : est_un
   NOTE ||--|| CONTENU : est_un
   PHOTO ||--|| CONTENU : est_un
+  PUBLICATION ||--|| CONTENU : est_un
+  USER ||--o{ PUBLICATION : redige
+  PUBLICATION o|--o| PHOTO : attache
+  PUBLICATION o|--o| NOTE : attache
+  PUBLICATION o|--o| CROQUIS : attache
   CONTENU ||--o{ COMMENTAIRE : recoit
+  COMMENTAIRE o|--o{ COMMENTAIRE : repond_a
+  USER ||--o{ MENTION_UTILISATEUR : est_mentionne
+  COMMENTAIRE o|--o{ MENTION_UTILISATEUR : contient
+  PUBLICATION o|--o{ MENTION_UTILISATEUR : contient
   CONTENU ||--o{ MENTION_JAIME : recoit
   CONTENU ||--o{ ASSOCIATION_TAG : etiquete
   TAG ||--o{ ASSOCIATION_TAG : applique
@@ -296,13 +320,13 @@ erDiagram
   OBJET ||--o{ DESIGNATION : designe
   PHOTO ||--o| DETAILS_ASTROPHOTO : precise
   DETAILS_ASTROPHOTO ||--o{ ACQUISITION_FILTRE : detaille
-  UTILISATEUR ||--o{ EVENEMENT_ASTRO : administre
+  USER ||--o{ EVENEMENT_ASTRO : administre
   OBJET o|--o{ EVENEMENT_ASTRO : concerne
 
-  STATUT_UTILISATEUR ||--o{ UTILISATEUR : qualifie
-  NIVEAU_EXPERIENCE ||--o{ UTILISATEUR : qualifie
-  ROLE_PLATEFORME ||--o{ UTILISATEUR : qualifie
-  ETAT_COMPTE ||--o{ UTILISATEUR : qualifie
+  STATUT_UTILISATEUR ||--o{ USER : qualifie
+  NIVEAU_EXPERIENCE ||--o{ USER : qualifie
+  ROLE ||--o{ USER : qualifie
+  ETAT_COMPTE ||--o{ USER : qualifie
   VISIBILITE_PARTICIPATION ||--o{ SESSION : qualifie
   TYPE_SESSION o|--o{ SESSION : qualifie
   STATUT_SESSION ||--o{ SESSION : qualifie
@@ -318,7 +342,7 @@ erDiagram
   TYPE_EVENEMENT_ASTRO ||--o{ EVENEMENT_ASTRO : qualifie
   NIVEAU_IMPORTANCE_EVENEMENT ||--o{ EVENEMENT_ASTRO : qualifie
 
-  UTILISATEUR {
+  USER {
     string pseudo
     string email
     string mot_de_passe_hash
@@ -345,7 +369,7 @@ erDiagram
   NIVEAU_EXPERIENCE {
     string libelle
   }
-  ROLE_PLATEFORME {
+  ROLE {
     string libelle
   }
   ETAT_COMPTE {
@@ -422,6 +446,11 @@ erDiagram
     datetime created_at
     datetime updated_at
   }
+  PUBLICATION {
+    string texte
+    datetime created_at
+    datetime updated_at
+  }
   CROQUIS {
     string image
     datetime date_creation
@@ -448,6 +477,9 @@ erDiagram
   COMMENTAIRE {
     string texte
     datetime date
+  }
+  MENTION_UTILISATEUR {
+    datetime created_at
   }
   CONTENU {
     datetime date_publication
