@@ -155,9 +155,10 @@ VALUES
     ('Expert');
 
 INSERT INTO role (libelle)
-VALUES ('Membre'),
-       ('Modérateur'),
-       ('Administrateur');
+VALUES
+    ('Membre'),
+    ('Modérateur'),
+    ('Administrateur');
 
 INSERT INTO etat_compte (libelle)
 VALUES
@@ -305,6 +306,7 @@ CREATE TABLE "user" (
     token_reinitialisation_mdp  TEXT, -- distinct du token de vérification email, volontairement
     date_expiration_token_reset TIMESTAMPTZ,
     date_demande_suppression    TIMESTAMPTZ, -- file d'attente admin : renseignée tant que etat_compte reste 'actif'
+    date_suppression_prevue     TIMESTAMPTZ, -- = date_demande_suppression + 30 jours ; suppression auto si non révoquée par un admin d'ici là
     created_at                  TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at                  TIMESTAMPTZ NOT NULL DEFAULT now()
 );

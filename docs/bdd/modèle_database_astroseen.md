@@ -34,7 +34,8 @@ La v1 n'ayant jamais été mise en production, cette révision corrige aussi dir
 - `date_verification_email` (optionnel) — renseigné une fois la vérification effectuée
 - `token_reinitialisation_mdp` (optionnel) — jeton distinct de celui de vérification email, envoyé pour réinitialiser le mot de passe. Séparé volontairement : partager le même jeton entre les deux flux invaliderait l'un en résolvant l'autre.
 - `date_expiration_token_reset` (optionnel) — le lien de réinitialisation n'est valable que temporairement, comme celui de vérification
-- `date_demande_suppression` (optionnel) — renseignée quand l'utilisateur demande la suppression de son compte (droit à l'effacement RGPD), tant que `etat_compte` reste encore `actif`. Un admin doit traiter la demande pour que `etat_compte` bascule à `supprimé` — sans ce champ, impossible de constituer une file d'attente des demandes en cours.
+- `date_demande_suppression` (optionnel) — renseignée quand l'utilisateur demande la suppression de son compte (droit à l'effacement RGPD), tant que `etat_compte` reste encore `actif`.
+- `date_suppression_prevue` (optionnel) — calculée à `date_demande_suppression + 30 jours` au moment de la demande, stockée explicitement plutôt que recalculée à la volée (cohérent avec `date_expiration_token` et les autres délais déjà modélisés). Passé ce délai sans intervention, la suppression s'exécute automatiquement (job planifié, hors périmètre du modèle de données — bascule `etat_compte` à `supprimé` et déclenche l'anonymisation déjà documentée). **Révocation** : si l'utilisateur change d'avis, il doit passer par le support — c'est un admin qui annule la demande (les deux champs repassent à `NULL`), pas un bouton en libre-service côté utilisateur. Sans ce champ, impossible de trier la file d'attente admin par urgence ni de savoir quand la suppression automatique doit se déclencher.
 
 ### Toutes les classifications sont des tables de référence, pas des enums
 Décision transversale : **aucun type énuméré** (enum PostgreSQL/Prisma) dans tout le modèle — chaque classification (statut, type, visibilité, catégorie...) est une table de référence à part entière, avec un simple `id` + `libelle`. Plus simple à manipuler côté code (une jointure uniforme plutôt que deux façons différentes de gérer une valeur fixe), et une nouvelle valeur s'ajoute par une insertion de ligne, sans migration de schéma.
@@ -92,7 +93,7 @@ Aucune modification nécessaire sur `Session`, `Note`, `Photo`, `Commentaire`, `
 ### Type de matériel (nouvelle table de référence)
 Le champ `type` de `Matériel` recouvre des choses trop diverses (télescope, monture, caméra, oculaire, filtre, réducteur de focale, Barlow, autoguideur, trépied...) pour rester un simple champ texte libre — même risque de doublons/variantes orthographiques que pour statut/niveau/rôle. Il devient une table de référence :
 
-**Type_Materiel** (nouvelle)
+**Type_Materiel**
 - `libelle` — valeurs de départ : *Télescope*, *Monture*, *Caméra*, *Oculaire*, *Filtre*, *Réducteur de focale*, *Barlow*, *Autoguideur*, *Trépied*, *Autre*
 
 ### Ensemble / Matériel -> relation N-N, catalogue partagé et suppression conditionnelle
@@ -129,7 +130,7 @@ Un même appareil physique (une caméra, un oculaire, une monture...) peut appar
   - Une seule des deux paires est renseignée par note, selon le type de monture utilisé. Aucune colonne ne stocke explicitement "quel système a été utilisé" : cette détermination se fait côté frontend en fonction des champs remplis. Toutes les valeurs sont stockées en degrés décimaux (y compris l'ascension droite, habituellement affichée en h/m/s) pour rester directement exploitables en calcul/tri — la conversion en h/m/s ou d/m/s ne se fait qu'à l'affichage.
 - **Correction** : la relation vers `Ensemble` passe d'obligatoire à optionnelle, pour permettre l'observation à l'œil nu sans obliger l'utilisateur à créer un faux ensemble matériel.
 
-### Objet du ciel (ex-Cible), renommage, désignations multiples et caractéristiques structurées
+### Objet du ciel, renommage, désignations multiples et caractéristiques structurées
 Renommé de `Cible` à `Objet` — plus fidèle au vocabulaire courant (« objets du ciel profond ») ; `Cible` prêtait à confusion, l'idée de départ étant juste qu'il s'agit de l'objet visé par l'observation.
 - rattaché à une `Classification astronomique` (table de référence, ex-`Type objet` — renommé pour plus de précision) — valeurs détaillées ci-dessous
   - `icone_vectorielle` (optionnel, sur la table de référence) — icône SVG générique de cette classification, affichée en secours quand le filtre « Images personnelles » d'un objet ne retourne aucune photo — évite de laisser croire à l'utilisateur qu'une image communautaire lui appartient
@@ -159,12 +160,12 @@ Un objet peut ainsi porter autant de caractéristiques que pertinent pour son ty
 ### Détails astrophoto -> support multi-filtres
 Une acquisition LRGB ou en bande étroite utilise plusieurs filtres avec des temps de pose, un nombre de poses et un nombre de flats différents pour chacun (contrairement aux darks/bias, indépendants du filtre). La v1 ne pouvait décrire qu'une acquisition mono-filtre. On sort ces champs dans une sous-table :
 
-**Détails astrophoto** (allégée)
+**Détails astrophoto**
 - `gain_iso`, `ouverture`, `focale_effective`
 - `nombre_darks`, `nombre_bias`
 - `logiciel_acquisition`, `logiciel_traitement`, `methode_empilement`
 
-**Acquisition filtre** (nouvelle, 1-N sous Détails astrophoto)
+**Acquisition filtre** (1-N sous Détails astrophoto)
 - `filtre`
 - `temps_pose`, `nombre_poses`, `nombre_flats`
 
@@ -188,7 +189,7 @@ Plutôt que de dupliquer trois fois (Session, Note, Photo) les mêmes mécanique
 
 `Session`, `Note`, `Photo` et désormais `Publication` sont chacune reliées en 1-1 à une ligne `Contenu`, créée automatiquement à leur création. `Commentaire`, la nouvelle `Mention j'aime` et le nouveau système de `Tag` se rattachent tous à `Contenu` plutôt qu'à chacune des tables séparément.
 
-**Publication** (nouvelle entité — le bouton « + » du fil d'actualité) — un post libre, façon réseau social, distinct d'une Note ou d'une Photo : pas rattaché à une Session, pensé pour partager un texte court avec, en option, un contenu déjà existant en pièce jointe.
+**Publication** (e bouton « + » du fil d'actualité) -> un post libre, façon réseau social, distinct d'une Note ou d'une Photo : pas rattaché à une Session, pensé pour partager un texte court avec, en option, un contenu déjà existant en pièce jointe.
 - `texte` (texte libre — ce qu'on écrit dans le post)
 - rattaché en 1-1 à un `Contenu` (comme les 3 autres types)
 - rattachée à un `User` auteur
@@ -201,18 +202,18 @@ Plutôt que de dupliquer trois fois (Session, Note, Photo) les mêmes mécanique
 **Commentaire — portée élargie** : se rattache désormais à `Contenu` (donc à une session, une note, une photo ou une publication indifféremment) au lieu de `Session` uniquement comme en v1/v2 — cohérent avec le fil d'actualité qui affiche des items individuels commentables.
 - **Réponses en fil** : `Commentaire` se rattache en optionnel à un autre `Commentaire` (`commentaire_parent`, auto-référence) — `NULL` pour un commentaire de premier niveau, renseigné pour une réponse. Volontairement limité à un seul niveau de profondeur côté application (une réponse à une réponse s'affiche au même niveau que sa réponse parente) pour éviter un fil illisible à l'infini — c'est une convention d'affichage, pas une contrainte du schéma, qui autorise techniquement une profondeur illimitée.
 
-**Mention utilisateur** (nouvelle) — le `@pseudo` façon Discord, dans un commentaire ou une publication. Nommée `Mention_utilisateur` et non simplement `Mention`, pour ne pas se confondre avec `Mention_jaime` (les likes) qui existe déjà.
+**Mention utilisateur** — le `@pseudo` façon Discord, dans un commentaire ou une publication. Nommée `Mention_utilisateur` et non simplement `Mention`, pour ne pas se confondre avec `Mention_jaime` (les likes) qui existe déjà.
 - rattachée à l'`User` mentionné
 - rattachée en optionnel à **un seul** des deux : `Commentaire` ou `Publication` (jamais les deux, contrainte applicative comme pour `Publication` plus haut) — volontairement pas étendue à `Note.recit`, trop coûteux à re-parser dans un champ Markdown long pour un besoin pas exprimé
 - déclenche une notification pour l'utilisateur mentionné (mécanisme de notification pas encore modélisé — à faire au moment de s'y atteler)
 
-**Mention j'aime** (nouvelle)
+**Mention j'aime**
 - `date`
 - rédigée par un `User`, ciblant un `Contenu`
 - contrainte d'unicité (utilisateur, contenu) : un like par personne et par contenu
 - **Ne s'applique pas à un `Contenu` de type `Note`** — une note n'est pas un post, le like n'a pas de sens dessus (règle applicative, pas une contrainte du schéma, cohérent avec les autres exceptions par type déjà documentées sur `Contenu`). Les commentaires restent actifs sur une Note : ils servent à signaler une difficulté rencontrée ou demander une précision, pas à socialiser.
 
-**Tag** (nouveau)
+**Tag**
 - `nom`
 
 **Association tag** (nouvelle, jointure N-N entre `Tag` et `Contenu`)
@@ -223,7 +224,7 @@ Plutôt que de dupliquer trois fois (Session, Note, Photo) les mêmes mécanique
 
 **Croquis** : pas de ligne `Contenu` propre — un croquis suit la visibilité de la `Note` à laquelle il est rattaché, il n'est jamais publié indépendamment.
 
-### Objet — planétarium (catalogue consultable)
+### Objet -> planétarium (catalogue consultable)
 Pour servir de page « fiche objet » consultable librement (façon Pokédex), `Objet` porte :
 - `nom` (nom usuel affiché, ex. *Lune*, *Nébuleuse d'Orion* — distinct des codes de catalogue portés par `Désignation`)
 - `description` (texte — présentation générale, courte)
@@ -234,12 +235,12 @@ Pour servir de page « fiche objet » consultable librement (façon Pokédex), `
 La page « fiche objet » du planétarium affiche les `Photo` où `objet = cet objet` et `Contenu.visibilite = publique`, avec un filtre **Images personnelles / Images communautaires** qui ne fait que distinguer, à l'affichage, les photos dont l'auteur est l'utilisateur connecté de celles publiées par les autres — aucune structure supplémentaire n'est nécessaire, c'est une simple requête filtrée sur les relations déjà existantes (`Photo.publie_par` + `Contenu.visibilite`).
 
 
-### Calendrier — événements astronomiques (nouvelle entité)
+### Calendrier -> événements astronomiques
 Le calendrier combine deux sources bien distinctes, à ne pas mélanger dans une seule table :
 - les **sessions de l'utilisateur** (créées par lui, ou auxquelles il a une `Participation` acceptée) — déjà entièrement modélisées via `Session`/`Participation`, aucune nouvelle structure nécessaire, c'est une simple requête combinée à l'affichage ;
 - les **événements astronomiques** (éclipses, pluies de météores, oppositions planétaires...), qui n'existent pas encore et sont gérés par un administrateur plutôt que par les utilisateurs.
 
-**Événement astronomique** (nouvelle entité)
+**Événement astronomique**
 - `titre`
 - `description`
 - `date_debut`, `date_fin` (optionnel — nul pour un événement ponctuel comme une éclipse, renseigné pour une période comme un pic de pluie de météores)
@@ -250,9 +251,9 @@ Le calendrier combine deux sources bien distinctes, à ne pas mélanger dans une
 
 
 
-### Signalement et modération de contenu (à implémenter plus tard, via une nouvelle migration)
+### Signalement et modération de contenu
 
-**Signalement** (nouvelle entité)
+**Signalement**
 - rattaché à un `Contenu` (ce qui est signalé) et à un `User` (qui signale)
 - rattaché à un `Motif signalement` (table de référence) — valeurs de départ : *Contenu inapproprié*, *Harcèlement*, *Spam*, *Désinformation*, *Contenu illégal*, *Autre*
 - `description` (texte libre, optionnel — précision du signalant)
@@ -262,7 +263,7 @@ Le calendrier combine deux sources bien distinctes, à ne pas mélanger dans une
 
 **Visibilite_Contenu** — une 4ᵉ valeur s'ajoute : *Restreinte* (en plus de *Privée*/*Session*/*Publique*, cette dernière déjà une évolution ultérieure — voir plus haut), visible uniquement par le staff et l'auteur du contenu
 
-**Action_Moderation** (nouvelle entité) — trace ce que fait un modérateur **sur un contenu** (pas sur un signalement précis, puisqu'il examine l'ensemble des signalements reçus avant d'agir ; plusieurs actions possibles dans le temps sur un même contenu, ex. restreindre puis republier)
+**Action_Moderation** -> trace ce que fait un modérateur **sur un contenu** (pas sur un signalement précis, puisqu'il examine l'ensemble des signalements reçus avant d'agir ; plusieurs actions possibles dans le temps sur un même contenu, ex. restreindre puis republier)
 - rattachée au `Contenu` concerné et à l'`User` modérateur qui agit
 - rattachée à un `Type action moderation` (table de référence) — valeurs de départ : *Restreindre*, *Demander une modification*, *Valider et republier*, *Supprimer*
 - rattachée en optionnel à un `Motif signalement` (le motif structuré retenu par le staff, réutilise la même table — au choix du modérateur, structuré ou texte libre uniquement)
@@ -361,6 +362,7 @@ erDiagram
     string token_reinitialisation_mdp
     datetime date_expiration_token_reset
     datetime date_demande_suppression
+    datetime date_suppression_prevue
     datetime created_at
     datetime updated_at
   }

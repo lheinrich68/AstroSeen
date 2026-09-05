@@ -12,7 +12,7 @@ USER (id_user, pseudo, email, hashed_password, nom_affiche, bio,
              photo_profil, email_verifie, token_verification_email,
              date_expiration_token, date_verification_email,
              token_reinitialisation_mdp, date_expiration_token_reset,
-             date_demande_suppression,
+             date_demande_suppression, date_suppression_prevue,
              created_at, updated_at)
 
 STATUT_UTILISATEUR (id_statut_utilisateur, libelle)
