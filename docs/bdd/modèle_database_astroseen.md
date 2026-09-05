@@ -15,7 +15,7 @@ La v1 n'ayant jamais été mise en production, cette révision corrige aussi dir
 ### Utilisateur -> étendu
 - `pseudo`
 - `email` — **absent par erreur des versions précédentes du modèle**, alors que c'est le champ d'identification de base pour l'authentification JWT
-- `mot_de_passe_hash` (jamais stocké en clair — hachage bcrypt ou argon2)
+- `hashed_password` (jamais stocké en clair — hachage bcrypt ou argon2). **Règle de validation côté application** (pas une contrainte du schéma) : mot de passe d'au moins 12 caractères avec au moins 1 chiffre, 1 majuscule et 1 caractère spécial — cohérent avec les recommandations de la CNIL sur l'authentification par mot de passe seul (sans mesure complémentaire comme un verrouillage temporaire après échecs répétés). Affiché comme une checklist en direct dans le formulaire d'inscription, pas juste un texte d'aide statique.
 - `nom_affiche` (optionnel — nom réel, utile pour les pros qui veulent être identifiables)
 - `bio` (optionnel)
 - rattaché à un `Statut utilisateur` (table de référence — voir ci-dessous)
@@ -70,7 +70,7 @@ Résout le point resté ouvert en section 9.3 du cahier des charges. Plutôt que
 
 - `Etat compte` : *actif* / *banni* / *supprimé*
   - **banni** : pseudo et nom affichés publiquement comme « Utilisateur anonyme », connexion bloquée, mais les données réelles (email, pseudo d'origine...) restent en base pour la traçabilité de modération.
-  - **supprimé** : en plus de l'affichage anonyme, les champs personnels (`email`, `mot_de_passe_hash`, `nom_affiche`, `bio`, `pseudo`) sont réellement écrasés — c'est la mise en œuvre concrète du droit à l'effacement RGPD, sans casser l'intégrité référentielle du contenu déjà publié.
+  - **supprimé** : en plus de l'affichage anonyme, les champs personnels (`email`, `hashed_password`, `nom_affiche`, `bio`, `pseudo`) sont réellement écrasés — c'est la mise en œuvre concrète du droit à l'effacement RGPD, sans casser l'intégrité référentielle du contenu déjà publié.
 
 **Vérification email — point à trancher côté implémentation** : le compte doit-il être totalement bloqué (impossible de se connecter) tant que `email_verifie = faux`, ou seulement limité dans certaines actions (ex. pas de publication publique avant vérification) ? Pas une question de modèle de données — les deux options utilisent les mêmes champs — mais à décider avant de coder le flux d'inscription/connexion (`AST-19`/`AST-20`).
 
@@ -198,7 +198,7 @@ Plutôt que de dupliquer trois fois (Session, Note, Photo) les mêmes mécanique
 
 `Session`, `Note`, `Photo` et désormais `Publication` sont chacune reliées en 1-1 à une ligne `Contenu`, créée automatiquement à leur création. `Commentaire`, la nouvelle `Mention j'aime` et le nouveau système de `Tag` se rattachent tous à `Contenu` plutôt qu'à chacune des tables séparément.
 
-**Publication** (e bouton « + » du fil d'actualité) -> un post libre, façon réseau social, distinct d'une Note ou d'une Photo : pas rattaché à une Session, pensé pour partager un texte court avec, en option, un contenu déjà existant en pièce jointe.
+**Publication** (le bouton « + » du fil d'actualité) -> un post libre, façon réseau social, distinct d'une Note ou d'une Photo : pas rattaché à une Session, pensé pour partager un texte court avec, en option, un contenu déjà existant en pièce jointe.
 - `texte` (texte libre — ce qu'on écrit dans le post)
 - rattaché en 1-1 à un `Contenu` (comme les 3 autres types)
 - rattachée à un `User` auteur
@@ -357,7 +357,7 @@ erDiagram
   USER {
     string pseudo
     string email
-    string mot_de_passe_hash
+    string hashed_password
     string nom_affiche
     string bio
     bool astronome_certifie
