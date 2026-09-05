@@ -210,6 +210,7 @@ Plutôt que de dupliquer trois fois (Session, Note, Photo) les mêmes mécanique
 - `date`
 - rédigée par un `User`, ciblant un `Contenu`
 - contrainte d'unicité (utilisateur, contenu) : un like par personne et par contenu
+- **Ne s'applique pas à un `Contenu` de type `Note`** — une note n'est pas un post, le like n'a pas de sens dessus (règle applicative, pas une contrainte du schéma, cohérent avec les autres exceptions par type déjà documentées sur `Contenu`). Les commentaires restent actifs sur une Note : ils servent à signaler une difficulté rencontrée ou demander une précision, pas à socialiser.
 
 **Tag** (nouveau)
 - `nom`
