@@ -75,7 +75,8 @@ CREATE TABLE categorie_ensemble (
 
 CREATE TABLE type_materiel (
     id_type_materiel  SERIAL PRIMARY KEY,
-    libelle           TEXT NOT NULL
+    libelle           TEXT NOT NULL,
+    icone_vectorielle TEXT -- icône générique par type, fallback si aucune photo personnelle
 );
 
 -- Classification d'un objet du ciel (ex-"type_objet") : renommé pour plus de
@@ -192,9 +193,7 @@ VALUES
     ('Refusée');
 
 INSERT INTO categorie_ensemble (libelle)
-VALUES
-    ('Classique'),
-    ('Astrophoto');
+VALUES ('Classique'), ('Astrophoto');
 
 INSERT INTO type_materiel (libelle)
 VALUES
@@ -209,8 +208,7 @@ VALUES
     ('Trépied'),
     ('Autre');
 
-INSERT INTO classification_astronomique (libelle)
-VALUES
+INSERT INTO classification_astronomique (libelle) VALUES
     ('Étoile'),
     ('Étoile variable'),
     ('Planète'),
@@ -417,31 +415,52 @@ CREATE TABLE materiel (
 
 CREATE INDEX idx_materiel_type ON materiel(id_type_materiel);
 
+-- Mon exemplaire personnel d'un modèle du catalogue partagé — photo et
+-- caractéristiques vivent ici, pas sur `materiel`, pour ne pas les partager
+-- entre tous les utilisateurs possédant le même modèle.
+CREATE TABLE user_materiel (
+    id_user_materiel SERIAL PRIMARY KEY,
+    id_user          UUID NOT NULL REFERENCES "user"(id_user),
+    id_materiel      INT NOT NULL REFERENCES materiel(id_materiel),
+    caracteristiques TEXT,
+    photo            TEXT -- photo personnelle de mon exemplaire ; sinon icone_vectorielle du type sert de repli
+);
+
+CREATE INDEX idx_user_materiel_user ON user_materiel(id_user);
+CREATE INDEX idx_user_materiel_materiel ON user_materiel(id_materiel);
+
 CREATE TABLE ensemble_materiel (
     id_ensemble_materiel SERIAL PRIMARY KEY,
     id_ensemble          INT NOT NULL REFERENCES ensemble(id_ensemble),
-    id_materiel          INT NOT NULL REFERENCES materiel(id_materiel),
+    -- Référence l'exemplaire possédé, pas la fiche catalogue directement — un
+    -- ensemble ne peut regrouper que du matériel que l'utilisateur possède réellement
+    id_user_materiel     INT NOT NULL REFERENCES user_materiel(id_user_materiel) ON DELETE CASCADE,
 
-    UNIQUE (id_ensemble, id_materiel)
+    UNIQUE (id_ensemble, id_user_materiel)
 );
 
 CREATE INDEX idx_ensemble_materiel_ensemble ON ensemble_materiel(id_ensemble);
-CREATE INDEX idx_ensemble_materiel_materiel ON ensemble_materiel(id_materiel);
+CREATE INDEX idx_ensemble_materiel_user_materiel ON ensemble_materiel(id_user_materiel);
 
+-- Suppression conditionnelle du catalogue partagé : se déclenche quand un
+-- utilisateur retire un modèle de SON inventaire personnel (user_materiel),
+-- pas quand il le retire d'un simple ensemble (ON DELETE CASCADE s'en charge
+-- déjà pour ensemble_materiel — retirer un ensemble ne veut pas dire qu'on ne
+-- possède plus l'objet, juste qu'il n'est plus dans ce kit précis).
 CREATE OR REPLACE FUNCTION cleanup_materiel_orphelin()
 RETURNS TRIGGER AS $$
 BEGIN
 DELETE FROM materiel
 WHERE id_materiel = OLD.id_materiel
   AND NOT EXISTS (
-    SELECT 1 FROM ensemble_materiel WHERE id_materiel = OLD.id_materiel
+    SELECT 1 FROM user_materiel WHERE id_materiel = OLD.id_materiel
 );
 RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trg_cleanup_materiel_orphelin
-    AFTER DELETE ON ensemble_materiel
+    AFTER DELETE ON user_materiel
     FOR EACH ROW EXECUTE FUNCTION cleanup_materiel_orphelin();
 
 -- ---------------------------------------------------------------------------

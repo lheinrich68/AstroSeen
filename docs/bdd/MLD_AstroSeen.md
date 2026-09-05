@@ -43,11 +43,13 @@ ENSEMBLE (id_ensemble, nom, #id_categorie_ensemble, #id_proprietaire)
 
 CATEGORIE_ENSEMBLE (id_categorie_ensemble, libelle)
 
-MATERIEL (id_materiel, marque, modele, caracteristiques, #id_type_materiel)
+MATERIEL (id_materiel, marque, modele, #id_type_materiel)
 
-TYPE_MATERIEL (id_type_materiel, libelle)
+USER_MATERIEL (id_user_materiel, caracteristiques, photo, #id_user, #id_materiel)
 
-ENSEMBLE_MATERIEL (id_ensemble_materiel, #id_ensemble, #id_materiel)
+TYPE_MATERIEL (id_type_materiel, libelle, icone_vectorielle)
+
+ENSEMBLE_MATERIEL (id_ensemble_materiel, #id_ensemble, #id_user_materiel)
 
 OBJET (id_objet, nom, #id_classification_astronomique, description, histoire, image_reference)
 

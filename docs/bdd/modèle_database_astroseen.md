@@ -95,19 +95,28 @@ Le champ `type` de `Matériel` recouvre des choses trop diverses (télescope, mo
 
 **Type_Materiel**
 - `libelle` — valeurs de départ : *Télescope*, *Monture*, *Caméra*, *Oculaire*, *Filtre*, *Réducteur de focale*, *Barlow*, *Autoguideur*, *Trépied*, *Autre*
+- `icone_vectorielle` (optionnel) — icône générique par type, même principe que sur `Classification_Astronomique` et `Type_Evenement_Astro` : affichée en secours quand l'utilisateur n'a pas mis sa propre photo sur son exemplaire
 
-### Ensemble / Matériel -> relation N-N, catalogue partagé et suppression conditionnelle
-Un même appareil physique (une caméra, un oculaire, une monture...) peut appartenir à **plusieurs** `Ensemble` — par exemple une caméra utilisée à la fois dans un setup « visuel club » et un setup « astrophoto Ha/OIII/SII ». La relation `Ensemble`–`Matériel` passe donc de 1-N à **N-N**, via une table de jointure :
-
-**Ensemble_Materiel** (nouvelle, jointure N-N)
-- rattache un `Ensemble` à un `Matériel`
-- contrainte d'unicité (ensemble, matériel) : pas de doublon d'association
+### Ensemble / Matériel — relation N-N, catalogue partagé et suppression conditionnelle
+Un même appareil physique (une caméra, un oculaire, une monture...) peut appartenir à **plusieurs** `Ensemble` — par exemple une caméra utilisée à la fois dans un setup « visuel club » et un setup « astrophoto Ha/OIII/SII ». La relation `Ensemble`–`Matériel` passe donc de 1-N à **N-N**.
 
 `Matériel` devient un **catalogue partagé entre tous les utilisateurs**, plutôt qu'une fiche dupliquée à chaque saisie :
 - **Dédoublonnage** : contrainte d'unicité sur (`type`, `marque`, `modèle`) — le `type` étant désormais une référence vers `Type_Materiel` plutôt qu'un texte libre — si un modèle de télescope existe déjà en base, une nouvelle personne qui l'ajoute est reliée à la fiche existante plutôt que d'en créer une copie. Ça implique une recherche/autocomplétion côté saisie (« ce modèle existe déjà, voulez-vous le réutiliser ? ») plutôt qu'un simple formulaire libre. Un matériel sans marque/modèle renseigné (générique, sans info suffisante pour matcher) reste dédupliqué au cas par cas, sans forcer de fusion hasardeuse.
-- **Suppression conditionnelle** : retirer un matériel de sa propre liste ne fait que supprimer le lien `Ensemble_Materiel` correspondant — la fiche `Matériel` elle-même n'est supprimée de la base que si **plus aucun** `Ensemble_Materiel` ne la référence. Cette règle est implémentée par un trigger côté base (voir `mpd_astroseen.sql`), pas seulement côté application, pour garantir qu'elle s'applique quel que soit le chemin de suppression emprunté.
+- `Matériel` ne porte plus que ce qui définit vraiment le modèle (`type`, `marque`, `modèle`) — rien de personnel dessus.
 
-### Note -> conditions structurées et correction de cardinalité
+**User_Materiel** — mon exemplaire personnel d'un modèle du catalogue partagé
+- rattachée à un `User` (le propriétaire) et à un `Matériel` (le modèle du catalogue)
+- `caracteristiques` (optionnel) — déplacé depuis `Matériel` : une modification ou un accessoire propre à mon exemplaire n'a pas à s'afficher chez tous les utilisateurs possédant le même modèle
+- `photo` (optionnel) — photo de mon exemplaire précis (pas une photo de fiche produit partagée) ; sinon `icone_vectorielle` du `Type_Materiel` sert de repli, même logique que pour les photos communautaires du planétarium
+- C'est cette table, pas `Matériel`, qui représente « je possède ce modèle » — la liste « Mon matériel » se construit à partir d'elle
+
+**Ensemble_Materiel** (jointure N-N)
+- rattache un `Ensemble` à un `User_Materiel` (et non directement à `Matériel`) — un ensemble ne peut regrouper que du matériel que l'utilisateur possède réellement, pas n'importe quelle fiche du catalogue partagé
+- contrainte d'unicité (ensemble, user_materiel) : pas de doublon d'association
+- **Suppression en cascade** : retirer mon exemplaire de mon inventaire (`User_Materiel`) supprime automatiquement ses liens dans tous les ensembles qui l'utilisaient (`ON DELETE CASCADE`) — logique, un ensemble ne peut pas contenir un objet que je ne possède plus
+- **Suppression conditionnelle du catalogue** : à l'inverse, retirer un matériel d'un simple ensemble ne supprime rien côté catalogue — je le possède peut-être toujours, juste plus dans ce kit précis. C'est la suppression de mon `User_Materiel` (je me débarrasse de l'objet) qui déclenche la vérification : si plus **aucun** utilisateur ne possède ce modèle (plus aucune ligne `User_Materiel` ne le référence), la fiche `Matériel` elle-même est supprimée du catalogue. Implémenté par un trigger côté base (voir `mpd_astroseen.sql`), pas seulement côté application.
+
+### Note — conditions structurées et correction de cardinalité
 - `date_note` (date, obligatoire) — la nuit précise à laquelle porte cette note. Pré-remplie automatiquement depuis `Session.date_debut` à la création, mais modifiable : une session peut s'étaler sur plusieurs nuits, une note doit pouvoir préciser sur laquelle elle porte, indépendamment de l'heure exacte (`heure_debut`/`heure_fin`, toujours optionnelles ci-dessous).
 - `seeing_pickering` (int, 1 à 10) — **seule échelle stockée en base**, la plus précise des deux. L'échelle d'Antoniadi (I à V, avec le libellé qualité *Parfaite / Très bonne / Moyenne / Mauvaise / Très mauvaise*) est dérivée à l'affichage par une table de correspondance fixe côté application (pas une table en base, puisque c'est une conversion figée, pas une donnée) :
 
@@ -252,7 +261,6 @@ Le calendrier combine deux sources bien distinctes, à ne pas mélanger dans une
 
 
 ### Signalement et modération de contenu
-
 **Signalement**
 - rattaché à un `Contenu` (ce qui est signalé) et à un `User` (qui signale)
 - rattaché à un `Motif signalement` (table de référence) — valeurs de départ : *Contenu inapproprié*, *Harcèlement*, *Spam*, *Désinformation*, *Contenu illégal*, *Autre*
@@ -285,7 +293,9 @@ erDiagram
   SESSION ||--o{ PARTICIPATION : regroupe
   USER ||--o{ ENSEMBLE : possede
   ENSEMBLE ||--o{ ENSEMBLE_MATERIEL : compose_de
-  MATERIEL ||--o{ ENSEMBLE_MATERIEL : appartient_a
+  USER_MATERIEL ||--o{ ENSEMBLE_MATERIEL : appartient_a
+  USER ||--o{ USER_MATERIEL : possede
+  MATERIEL ||--o{ USER_MATERIEL : instance_de
   TYPE_MATERIEL ||--o{ MATERIEL : categorise
   USER ||--o{ LIEU : enregistre
   LIEU o|--o{ SESSION : lieu_par_defaut
@@ -416,10 +426,14 @@ erDiagram
   MATERIEL {
     string marque
     string modele
+  }
+  USER_MATERIEL {
     string caracteristiques
+    string photo
   }
   TYPE_MATERIEL {
     string libelle
+    string icone_vectorielle
   }
   ENSEMBLE_MATERIEL {
   }

@@ -95,9 +95,10 @@ model Categorie_Ensemble {
 }
 
 model Type_Materiel {
-  id        Int        @id @default(autoincrement()) @map("id_type_materiel")
-  libelle   String
-  materiels Materiel[]
+  id               Int        @id @default(autoincrement()) @map("id_type_materiel")
+  libelle          String
+  iconeVectorielle String?    @map("icone_vectorielle") // icône générique par type, fallback si aucune photo personnelle
+  materiels        Materiel[]
 
   @@map("type_materiel")
 }
@@ -224,17 +225,18 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  sessionsCreees  Session[]             @relation("SessionCreateur")
-  participations  Participation[]
-  lieux           Lieu[]
-  ensembles       Ensemble[]
-  notes           Note[]
-  photos          Photo[]
-  commentaires    Commentaire[]
-  mentionsJaime   Mention_Jaime[]
-  evenementsCrees Evenement_Astro[]
-  publications    Publication[]
-  mentionsRecues  Mention_Utilisateur[]
+  sessionsCreees    Session[]             @relation("SessionCreateur")
+  participations    Participation[]
+  lieux             Lieu[]
+  ensembles         Ensemble[]
+  notes             Note[]
+  photos            Photo[]
+  commentaires      Commentaire[]
+  mentionsJaime     Mention_Jaime[]
+  evenementsCrees   Evenement_Astro[]
+  publications      Publication[]
+  mentionsRecues    Mention_Utilisateur[]
+  materielsPossedes User_Materiel[]
 
   @@map("user")
 }
@@ -472,33 +474,53 @@ model Ensemble {
 }
 
 model Materiel {
-  id               Int     @id @default(autoincrement()) @map("id_materiel")
-  marque           String?
-  modele           String?
-  caracteristiques String?
+  id     Int     @id @default(autoincrement()) @map("id_materiel")
+  marque String?
+  modele String?
 
   typeMateriel   Type_Materiel @relation(fields: [typeMaterielId], references: [id])
   typeMaterielId Int           @map("id_type_materiel")
 
-  ensembles Ensemble_Materiel[]
+  possesseurs User_Materiel[]
 
   // Dédoublonnage : deux utilisateurs avec le même modèle pointent vers la
   // même fiche plutôt que d'en créer une copie (find-or-create côté API).
   // Suppression conditionnelle gérée par un trigger SQL, pas ici — voir
-  // cleanup_materiel_orphelin() dans mpd_astroseen.sql.
+  // cleanup_materiel_orphelin() dans mpd_astroseen.sql. Se déclenche quand un
+  // User_Materiel est supprimé, pas un Ensemble_Materiel (voir plus bas).
   @@unique([typeMaterielId, marque, modele])
   @@map("materiel")
+}
+
+// Mon exemplaire personnel d'un modèle du catalogue partagé — photo et
+// caractéristiques vivent ici, pas sur Materiel, pour ne pas les partager
+// entre tous les utilisateurs possédant le même modèle.
+model User_Materiel {
+  id               Int     @id @default(autoincrement()) @map("id_user_materiel")
+  caracteristiques String?
+  photo            String? // photo personnelle de mon exemplaire ; sinon iconeVectorielle du type sert de repli
+
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String   @map("id_user")
+  materiel   Materiel @relation(fields: [materielId], references: [id])
+  materielId Int      @map("id_materiel")
+
+  ensembles Ensemble_Materiel[]
+
+  @@map("user_materiel")
 }
 
 model Ensemble_Materiel {
   id Int @id @default(autoincrement()) @map("id_ensemble_materiel")
 
-  ensemble   Ensemble @relation(fields: [ensembleId], references: [id])
-  ensembleId Int      @map("id_ensemble")
-  materiel   Materiel @relation(fields: [materielId], references: [id])
-  materielId Int      @map("id_materiel")
+  ensemble       Ensemble      @relation(fields: [ensembleId], references: [id])
+  ensembleId     Int           @map("id_ensemble")
+  // Référence l'exemplaire possédé, pas la fiche catalogue directement — un
+  // ensemble ne peut regrouper que du matériel que l'utilisateur possède réellement
+  userMateriel   User_Materiel @relation(fields: [userMaterielId], references: [id], onDelete: Cascade)
+  userMaterielId Int           @map("id_user_materiel")
 
-  @@unique([ensembleId, materielId])
+  @@unique([ensembleId, userMaterielId])
   @@map("ensemble_materiel")
 }
 
