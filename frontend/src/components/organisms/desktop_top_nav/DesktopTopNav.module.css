@@ -1,0 +1,89 @@
+.header {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(139, 147, 167, 0.1);
+    background: var(--color-bg-surface);
+    padding: 16px 40px;
+}
+@media (min-width: 768px) {
+    .header {
+        display: flex;
+    }
+}
+
+.leftGroup {
+    display: flex;
+    align-items: center;
+    gap: 44px;
+}
+
+.logoLink {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.wordmark {
+    font-family: var(--font-display);
+    font-size: 0.875rem;
+    letter-spacing: 0.03em;
+    color: var(--color-text-primary);
+}
+
+.linksRow {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+}
+
+.link {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+}
+.link:hover {
+    color: var(--color-text-primary);
+}
+.linkActive {
+    font-weight: 700;
+    color: var(--color-accent-signal);
+}
+
+.rightGroup {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.createButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+}
+
+.bellButton {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+}
+.bellButton:hover {
+    color: var(--color-text-primary);
+}
+
+.profileButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+}
+
+.avatar {
+    border: 1px solid rgba(79, 216, 224, 0.4);
+}
+
+.chevron {
+    color: var(--color-text-muted);
+}

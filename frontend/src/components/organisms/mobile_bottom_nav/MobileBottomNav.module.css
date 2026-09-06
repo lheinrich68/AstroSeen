@@ -1,0 +1,32 @@
+.nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid rgba(139, 147, 167, 0.1);
+    background: var(--color-bg-surface);
+    padding: 12px 24px;
+}
+@media (min-width: 768px) {
+    .nav {
+        display: none;
+    }
+}
+
+.createButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--color-accent-signal);
+}
+
+.createIcon {
+    color: var(--color-bg-void);
+}

@@ -1,0 +1,17 @@
+.footer {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    padding: 24px 32px;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+@media (min-width: 768px) {
+    .footer {
+        padding: 32px;
+    }
+}
+
+.link:hover {
+    color: var(--color-text-primary);
+}

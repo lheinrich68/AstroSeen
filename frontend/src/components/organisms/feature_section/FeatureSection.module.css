@@ -1,0 +1,14 @@
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    padding: 40px 32px;
+}
+@media (min-width: 768px) {
+    .section {
+        flex-direction: row;
+        justify-content: center;
+        gap: 48px;
+        padding: 64px;
+    }
+}
