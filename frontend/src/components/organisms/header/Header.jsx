@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import Logo from '../../../../public/logo_astroseen.svg'
+import Logo from '../../atoms/logo/Logo.jsx'
 import Button from '../../atoms/button/Button.jsx'
 import styles from './Header.module.css'
 

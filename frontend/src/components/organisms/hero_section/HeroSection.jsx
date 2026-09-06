@@ -8,8 +8,10 @@ export default function HeroSection() {
             <div className={styles.textCol}>
                 <h1 className={styles.title}>Observez. Partagez. Découvrez le ciel.</h1>
                 <p className={styles.description}>
-                    La plateforme des passionnés d'astronomie — amateurs, astrophotographes et
-                    professionnels. Consignez vos observations, échangez avec la communauté.
+                    La plateforme des passionnés d'astronomie, amateurs, astrophotographes et professionnels.
+                    Consignez vos observations nuit après nuit, organisez vos sorties avec d'autres passionnés,
+                    et partagez vos plus belles photos avec une communauté qui comprend vraiment ce que
+                    représente une bonne nuit de ciel dégagé.
                 </p>
                 <div className={styles.ctaCol}>
                     <Button as={Link} to="/inscription">
@@ -21,7 +23,20 @@ export default function HeroSection() {
                 </div>
             </div>
 
-            <div className={styles.illustration} />
+            {/* Photo (libre de droits, crédit ajouté par courtoisie) */}
+            <div className={styles.illustration}>
+        <span className={styles.credit}>
+          Photo :{' '}
+            <a
+                href="https://www.pexels.com/fr-fr/@lucaspezeta/"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+            Lucas Pezeta
+          </a>{' '}
+            / Pexels
+        </span>
+            </div>
         </section>
     )
 }

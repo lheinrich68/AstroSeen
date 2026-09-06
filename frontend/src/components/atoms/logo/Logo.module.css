@@ -1,0 +1,12 @@
+.ring,
+.tick {
+    stroke: var(--color-accent-signal);
+}
+
+.tick {
+    fill: var(--color-accent-signal);
+}
+
+.target {
+    fill: var(--color-accent-starlight);
+}
