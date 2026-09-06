@@ -6,41 +6,37 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "jest"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.3.3",
     "chart.js": "^4.5.1",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "lucide-react": "^1.41.0",
     "react": "^19.2.8",
     "react-big-calendar": "^1.20.0",
     "react-chartjs-2": "^5.3.1",
     "react-dom": "^19.2.8",
-    "react-router-dom": "^7.18.2",
-    "react-toastify": "^11.1.0",
-    "tailwind-merge": "^3.6.0"
+    "react-router-dom": "^7.18.3",
+    "react-toastify": "^11.1.0"
   },
   "devDependencies": {
     "@babel/preset-env": "^8.0.2",
     "@babel/preset-react": "^8.0.1",
     "@eslint/js": "^10.0.1",
     "@testing-library/jest-dom": "^7.0.1",
-    "@testing-library/react": "^16.3.2",
+    "@testing-library/react": "^16.3.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.1.0",
-    "babel-jest": "^30.4.1",
+    "babel-jest": "^30.5.1",
     "eslint": "^10.9.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.4",
     "globals": "^17.11.0",
     "identity-obj-proxy": "^3.0.0",
-    "jest": "^30.4.2",
-    "jest-environment-jsdom": "^30.4.1",
+    "jest": "^30.5.1",
+    "jest-environment-jsdom": "^30.5.1",
     "vite": "^8.2.2"
   }
 }
