@@ -1,0 +1,56 @@
+.wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.track {
+    position: relative;
+    width: 40px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.background {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: var(--color-bg-surface-high);
+    transition: background-color 0.15s;
+}
+.input:checked ~ .background {
+    background: var(--color-accent-signal);
+}
+
+.knob {
+    position: absolute;
+    left: 4px;
+    top: 4px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--color-text-muted);
+    transition: transform 0.15s, background-color 0.15s;
+}
+.input:checked ~ .knob {
+    transform: translateX(16px);
+    background: var(--color-bg-void);
+}
+
+.label {
+    font-size: 0.875rem;
+    color: var(--color-text-primary);
+}

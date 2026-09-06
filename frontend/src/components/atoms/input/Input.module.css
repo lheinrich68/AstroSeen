@@ -1,0 +1,51 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+}
+
+.box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(139, 147, 167, 0.25);
+    background: var(--color-bg-surface-high);
+    padding: 10px 14px;
+}
+
+.icon {
+    flex-shrink: 0;
+    color: var(--color-text-muted);
+}
+
+.input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    font-size: 0.875rem;
+    color: var(--color-text-primary);
+}
+.input:focus {
+    outline: none;
+}
+.input::placeholder {
+    color: var(--color-text-muted);
+}
+
+.toggle {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--color-text-muted);
+}
+.toggle:hover {
+    color: var(--color-text-primary);
+}

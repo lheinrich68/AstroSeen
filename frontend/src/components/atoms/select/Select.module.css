@@ -1,0 +1,45 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+}
+
+.box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border-radius: 6px;
+    border: 1px solid rgba(139, 147, 167, 0.25);
+    background: var(--color-bg-surface-high);
+    padding: 10px 14px;
+}
+
+.select {
+    width: 100%;
+    appearance: none;
+    background: transparent;
+    border: none;
+    padding-right: 24px;
+    font-size: 0.875rem;
+    color: var(--color-text-primary);
+}
+.select:focus {
+    outline: none;
+}
+.select option {
+    background: var(--color-bg-surface-high);
+    color: var(--color-text-primary);
+}
+
+.chevron {
+    position: absolute;
+    right: 14px;
+    pointer-events: none;
+    color: var(--color-text-muted);
+}

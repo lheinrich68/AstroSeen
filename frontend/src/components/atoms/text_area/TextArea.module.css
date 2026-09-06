@@ -1,0 +1,29 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+}
+
+.textarea {
+    width: 100%;
+    resize: none;
+    border-radius: 6px;
+    border: 1px solid rgba(139, 147, 167, 0.25);
+    background: var(--color-bg-surface-high);
+    padding: 10px 14px;
+    font-family: inherit;
+    font-size: 0.875rem;
+    color: var(--color-text-primary);
+}
+.textarea:focus {
+    outline: none;
+}
+.textarea::placeholder {
+    color: var(--color-text-muted);
+}

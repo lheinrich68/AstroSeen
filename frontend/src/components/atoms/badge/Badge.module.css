@@ -1,0 +1,31 @@
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.neutral {
+    background: var(--color-bg-surface-high);
+    color: var(--color-text-muted);
+}
+
+.signal {
+    background: rgba(79, 216, 224, 0.15);
+    color: var(--color-accent-signal);
+    border: 1px solid rgba(79, 216, 224, 0.4);
+}
+
+.starlight {
+    background: rgba(242, 184, 114, 0.15);
+    color: var(--color-accent-starlight);
+    border: 1px solid rgba(242, 184, 114, 0.4);
+}
+
+.danger {
+    background: rgba(217, 89, 89, 0.15);
+    color: var(--color-danger);
+}
