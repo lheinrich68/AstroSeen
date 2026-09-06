@@ -1,0 +1,14 @@
+.wrapper {
+    min-height: 100vh;
+    background: var(--color-bg-void);
+    color: var(--color-text-primary);
+}
+
+.main {
+    padding-bottom: 80px;
+}
+@media (min-width: 768px) {
+    .main {
+        padding-bottom: 0;
+    }
+}
