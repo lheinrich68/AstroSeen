@@ -39,7 +39,7 @@ const LoginPage = () => {
             <div className={styles.main}>
                 <div className={styles.content}>
                     <Link to="/" className={styles.logoLink}>
-                        <Logo size={28} />
+                        <Logo size={56} />
                         <span className={styles.wordmark}>ASTROSEEN</span>
                     </Link>
                     <div className={styles.card}>
@@ -74,7 +74,7 @@ const LoginPage = () => {
                         </form>
 
                         <p className={styles.signupText}>
-                            Pas encore de compte ? <Link to="/inscription">S'inscrire</Link>
+                            Pas encore de compte ? <Link to="/register">S'inscrire</Link>
                         </p>
                     </div>
                 </div>

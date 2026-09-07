@@ -1,9 +1,8 @@
-/* LoginPage.module.css — modifie .page et ajoute .main */
 .page {
     position: relative;
     min-height: 100vh;
     display: flex;
-    flex-direction: column;     /* empile au lieu de centrer en ligne */
+    flex-direction: column;
     padding: 32px;
     background-image:
             linear-gradient(rgba(6, 7, 12, 1), rgba(6, 7, 12, 0.6)),
@@ -13,18 +12,19 @@
     background-attachment: fixed;
 }
 
-.content {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    max-width: 380px;
-}
-
 .main {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 32px 0;
+}
+
+.content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 400px;
 }
 
 .content > * {
@@ -90,23 +90,25 @@
     gap: 16px;
 }
 
-.forgotLink {
-    align-self: flex-end;
-    font-size: 0.8125rem;
-    color: var(--color-text-muted);
-    margin-top: -8px;
-}
-.forgotLink:hover {
-    color: var(--color-text-primary);
+.checklistWrapper {
+    margin-top: 8px;
 }
 
-.signupText {
+.checkboxRow {
+    font-size: 0.8125rem;
+}
+
+.checkboxRow a {
+    color: var(--color-accent-signal);
+}
+
+.loginText {
     text-align: center;
     font-size: 0.875rem;
     color: var(--color-text-muted);
     margin-top: 20px;
 }
-.signupText a {
+.loginText a {
     color: var(--color-accent-signal);
     font-weight: 600;
 }

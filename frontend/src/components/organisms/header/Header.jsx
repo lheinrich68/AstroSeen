@@ -9,7 +9,7 @@ export default function Header() {
     return (
         <header className={styles.header}>
             <Link to="/" className={styles.logoLink}>
-                <Logo size={26} />
+                <Logo size={39} />
                 <span className={styles.wordmark}>ASTROSEEN</span>
             </Link>
 
