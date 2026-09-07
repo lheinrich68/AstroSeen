@@ -14,10 +14,10 @@ export default function Header() {
             </Link>
 
             <div className={styles.actions}>
-                <Link to="/connexion" className={styles.loginLink}>
+                <Link to="/login" className={styles.loginLink}>
                     Se connecter
                 </Link>
-                <Button as={Link} to="/inscription" className={styles.signupButton}>
+                <Button as={Link} to="/register" className={styles.signupButton}>
                     S'inscrire
                 </Button>
             </div>

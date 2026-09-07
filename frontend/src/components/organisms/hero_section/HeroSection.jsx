@@ -14,10 +14,10 @@ export default function HeroSection() {
                     représente une bonne nuit de ciel dégagé.
                 </p>
                 <div className={styles.ctaCol}>
-                    <Button as={Link} to="/inscription">
+                    <Button as={Link} to="/register">
                         Créer un compte gratuitement
                     </Button>
-                    <Link to="/connexion" className={styles.loginLink}>
+                    <Link to="/login" className={styles.loginLink}>
                         Déjà un compte ? Se connecter
                     </Link>
                 </div>
