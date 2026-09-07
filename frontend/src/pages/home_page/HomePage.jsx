@@ -22,16 +22,15 @@ const HomePage = () => {
 
             <span className={styles.credit}>
                 Photo :{' '}
-
-                href="https://pixabay.com/fr/users/felix-mittermeier-4397258/"
+                <a
+                    href="https://www.pexels.com/fr-fr/@thirdman/"
                     target="_blank"
                     rel="noopener noreferrer"
-                <a>
+                >
                     Thirdman
                 </a>{' '}
             / Pexels
         </span>
 </div>
-)
-}
+)}
 export default HomePage
