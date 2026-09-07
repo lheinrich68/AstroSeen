@@ -1,10 +1,9 @@
 .footer {
     display: flex;
-    justify-content: center;
-    gap: 24px;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
     padding: 24px 32px;
-    font-size: 0.75rem;
-    color: var(--color-text-muted);
 }
 @media (min-width: 768px) {
     .footer {
@@ -12,6 +11,20 @@
     }
 }
 
+.links {
+    display: flex;
+    gap: 24px;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
 .link:hover {
     color: var(--color-text-primary);
 }
+
+.copyright {
+    font-size: 0.6875rem;
+    color: rgba(139, 147, 167, 0.6);
+    text-align: center;
+}
+ 

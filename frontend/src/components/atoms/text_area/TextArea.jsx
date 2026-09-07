@@ -1,9 +1,14 @@
 import { forwardRef } from 'react'
 import { joinClassNames } from '@/utils/joinClassNames'
-import styles from './Textarea.module.css'
+import styles from './TextArea.module.css'
 
 const Textarea = forwardRef(function Textarea(
-    { label, rows = 3, className = '', ...props },
+    {
+        label,
+        rows = 3,
+        className = '',
+        ...props
+    },
     ref,
 ) {
     return (
