@@ -10,7 +10,7 @@ import Button from '../../components/atoms/button/Button.jsx'
 import StarField from '../../components/atoms/star_field/StarField.jsx'
 import Header from '../../components/organisms/header/Header.jsx'
 import Footer from '../../components/organisms/footer/Footer.jsx'
-import styles from './Contact.module.css'
+import styles from './ContactPage.module.css'
 
 // formulaire de contact.
 const SUBJECTS = [

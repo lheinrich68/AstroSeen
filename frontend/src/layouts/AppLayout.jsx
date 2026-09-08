@@ -9,7 +9,7 @@ import styles from './AppLayout.module.css'
 // haute). Les pages Auth et la page d'accueil visiteur ne passent PAS par ce
 // layout, donc pas de nav ni de toasts sur ces écrans-là par construction.
 
-export default function AppLayout() {
+const AppLayout = () => {
     return (
         <div className={styles.wrapper}>
             <DesktopTopNav />

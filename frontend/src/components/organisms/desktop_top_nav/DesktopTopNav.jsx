@@ -14,7 +14,7 @@ const LINKS = [
     { to: '/sessions', label: 'Mes sessions' },
 ]
 
-export default function DesktopTopNav() {
+const DesktopTopNav = () => {
     const [menuOpen, setMenuOpen] = useState(false)
 
     return (
@@ -62,3 +62,4 @@ export default function DesktopTopNav() {
         </header>
     )
 }
+export default DesktopTopNav

@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import StarField from '../../components/atoms/star_field/StarField.jsx'
-import styles from './Confidencialite.module.css'
+import styles from './ConfidencialitePage.module.css'
 import Header from '../../components/organisms/header/Header.jsx'
 import Footer from '../../components/organisms/footer/Footer.jsx'
 

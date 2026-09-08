@@ -16,7 +16,8 @@ import styles from './RegisterPage.module.css'
 // (POST /auth/register) une fois l'endpoint disponible, avec gestion des
 // erreurs (email déjà utilisé, etc.) et l'envoi de l'email de vérification
 // (cf. écran "Vérification email").
-export default function RegisterPage() {
+const RegisterPage = () => {
+    const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
     const [acceptedTerms, setAcceptedTerms] = useState(false)
@@ -27,7 +28,7 @@ export default function RegisterPage() {
         e.preventDefault()
 
         if (!isPasswordValid(password)) {
-            toast.error('Le mot de passe ne respecte pas encore toutes les règles.')
+            toast.error('Le mot de passe ne respecte pas encore toutes les règlementations.')
             return
         }
         if (password !== confirmPassword) {
@@ -44,7 +45,7 @@ export default function RegisterPage() {
         setTimeout(() => {
             toast.success('Compte créé — vérifie ta boîte mail pour confirmer ton adresse.')
             setSubmitting(false)
-            navigate('/verification-email')
+            navigate('/verification-email', { state: { email } })
         }, 600)
     }
 
@@ -55,7 +56,7 @@ export default function RegisterPage() {
             <div className={styles.main}>
                 <div className={styles.content}>
                     <Link to="/" className={styles.logoLink}>
-                        <Logo size={56} />
+                        <Logo size={28} />
                         <span className={styles.wordmark}>ASTROSEEN</span>
                     </Link>
 
@@ -70,7 +71,9 @@ export default function RegisterPage() {
                                 name="email"
                                 type="email"
                                 icon={Mail}
-                                placeholder="example@mail.com"
+                                placeholder="exemple@mail.com"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                                 required
                             />
 
@@ -80,7 +83,6 @@ export default function RegisterPage() {
                                     name="password"
                                     type="password"
                                     icon={Lock}
-                                    placeholder="••••••••"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
@@ -95,7 +97,6 @@ export default function RegisterPage() {
                                 name="confirmPassword"
                                 type="password"
                                 icon={Lock}
-                                placeholder="••••••••"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 required
@@ -119,7 +120,7 @@ export default function RegisterPage() {
                         </form>
 
                         <p className={styles.loginText}>
-                            Déjà un compte ? <Link to="/login">Se connecter</Link>
+                            Déjà un compte ? <Link to="/connexion">Se connecter</Link>
                         </p>
                     </div>
                 </div>
@@ -133,3 +134,4 @@ export default function RegisterPage() {
         </div>
     )
 }
+export default RegisterPage

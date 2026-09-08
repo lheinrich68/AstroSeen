@@ -4,7 +4,7 @@ import NavItem from '@/components/molecules/NavItem'
 import styles from './MobileBottomNav.module.css'
 
 
-export default function MobileBottomNav() {
+const MobileBottomNav = () => {
     return (
         <nav className={styles.nav}>
             <NavItem to="/feed" end icon={Home} label="Fil" />
@@ -19,3 +19,4 @@ export default function MobileBottomNav() {
         </nav>
     )
 }
+export default MobileBottomNav
