@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import Button from '../../atoms/button/Button.jsx'
 import styles from './HeroSection.module.css'
 
-export default function HeroSection() {
+const HeroSection = () => {
     return (
         <section className={styles.section}>
             <div className={styles.textCol}>
@@ -40,3 +40,4 @@ export default function HeroSection() {
         </section>
     )
 }
+export default HeroSection

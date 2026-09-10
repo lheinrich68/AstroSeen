@@ -2,7 +2,7 @@
 // Pas d'import : les fichiers de public/ se référencent par leur chemin
 // (servi tel quel à la racine par Vite), jamais via `import`.
 
-export default function Logo({ size = 32, className = '' }) {
+const Logo = ({ size = 32, className = '' }) => {
     return (
         <img
             src="/logo_astroseen.svg"
@@ -13,3 +13,4 @@ export default function Logo({ size = 32, className = '' }) {
         />
     )
 }
+export default Logo

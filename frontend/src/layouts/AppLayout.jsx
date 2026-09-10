@@ -28,3 +28,4 @@ const AppLayout = () => {
         </div>
     )
 }
+export default AppLayout

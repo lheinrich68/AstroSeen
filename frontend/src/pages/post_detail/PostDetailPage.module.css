@@ -1,0 +1,177 @@
+.page {
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 28px 20px 40px;
+}
+@media (min-width: 768px) {
+    .page {
+        max-width: 716px;
+        padding: 40px 20px 60px;
+    }
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    background: var(--color-bg-surface);
+    border: 1px solid rgba(139, 147, 167, 0.15);
+    border-radius: 12px;
+    padding: 24px;
+}
+@media (min-width: 768px) {
+    .container {
+        padding: 48px;
+    }
+}
+
+.backLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    background: none;
+    border: none;
+    margin-bottom: 14px;
+}
+.backLink:hover {
+    color: var(--color-text-primary);
+}
+
+.authorRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.authorGroup {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.authorName {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.time {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+.moreButton {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+}
+
+.title {
+    font-size: 1.25rem;
+    color: var(--color-text-primary);
+}
+
+.body {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+}
+
+.objectChip {
+    display: inline-flex;
+    align-self: flex-start;
+    align-items: center;
+    gap: 6px;
+    background: var(--color-bg-surface-high);
+    color: var(--color-text-primary);
+    border-radius: 11px;
+    padding: 4px 9px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+.objectChip svg {
+    color: var(--color-accent-starlight);
+}
+
+.likeRow {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.875rem;
+    color: var(--color-text-primary);
+}
+.likeRow svg {
+    color: var(--color-accent-signal);
+}
+
+.divider {
+    height: 1px;
+    background: rgba(139, 147, 167, 0.15);
+    border: none;
+    margin: 0;
+}
+
+.commentsTitle {
+    font-size: 1rem;
+    color: var(--color-text-primary);
+}
+
+.commentsList {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.replyingToRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    padding: 0 4px;
+}
+
+.cancelReplyButton {
+    background: none;
+    border: none;
+    color: var(--color-accent-signal);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.commentInputRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 22px;
+    border: 1px solid rgba(139, 147, 167, 0.25);
+    background: var(--color-bg-surface-high);
+    padding: 10px 16px;
+}
+
+.commentInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    font-size: 0.8125rem;
+    color: var(--color-text-primary);
+}
+.commentInput:focus {
+    outline: none;
+}
+.commentInput::placeholder {
+    color: var(--color-text-muted);
+}
+
+.sendButton {
+    background: none;
+    border: none;
+    color: var(--color-accent-signal);
+    display: flex;
+}
+.sendButton:disabled {
+    color: var(--color-text-muted);
+    cursor: default;
+}

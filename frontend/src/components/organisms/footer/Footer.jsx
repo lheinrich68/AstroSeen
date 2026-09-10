@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import styles from './Footer.module.css'
 
 
-export default function Footer() {
+const Footer = () => {
     const year = new Date().getFullYear()
 
     return (
@@ -18,3 +18,4 @@ export default function Footer() {
         </footer>
     )
 }
+export default Footer

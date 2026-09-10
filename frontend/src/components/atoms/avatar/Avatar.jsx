@@ -1,5 +1,5 @@
 import { joinClassNames } from '../../../utils/joinClassNames.js';
-import styles from './Avatar.modules.css'
+import styles from './Avatar.module.css'
 
 const Avatar = ({src, alt = '', size = 36, className = ''}) => {
     return (

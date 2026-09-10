@@ -1,0 +1,69 @@
+.page {
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 28px 20px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+@media (min-width: 768px) {
+    .page {
+        max-width: 900px;
+    }
+}
+@media (min-width: 1200px) {
+    .page {
+        max-width: 1400px;
+    }
+}
+
+.title {
+    font-size: 1.375rem;
+    color: var(--color-text-primary);
+}
+
+.filterRow {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* Galerie en colonnes CSS (façon Pinterest) => les cartes ont des hauteurs
+   très différentes (photo avec image vs note/session sans), donc une grille
+   classique laisserait des trous.
+   break-inside: avoid empêche une carte de se couper entre deux colonnes.
+*/
+@media (min-width: 768px) {
+    .list {
+        display: block;
+        column-count: 2;
+        column-gap: 16px;
+    }
+    .list > * {
+        break-inside: avoid;
+        margin-bottom: 16px;
+    }
+}
+@media (min-width: 1200px) {
+    .list {
+        column-count: 3;
+    }
+}
+@media (min-width: 1600px) {
+    .list {
+        column-count: 4;
+    }
+}
+
+.empty {
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    padding: 40px 0;
+}

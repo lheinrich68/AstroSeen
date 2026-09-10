@@ -2,7 +2,7 @@ import Header from '../../components/organisms/header/Header.jsx'
 import Footer from '../../components/organisms/footer/Footer.jsx'
 import HeroSection from "../../components/organisms/hero_section/HeroSection.jsx";
 import CTA_Section from "../../components/organisms/cta_section/CTASection.jsx"
-import FeaturesSection from "../../components/organisms/feature_section/FeatureSection.jsx";
+import FeatureSection from "../../components/organisms/feature_section/FeatureSection.jsx";
 import StarField from "../../components/atoms/star_field/StarField.jsx";
 import styles from './HomePage.module.css'
 
@@ -15,7 +15,7 @@ const HomePage = () => {
             <div className={styles.content}>
                 <Header />
                 <HeroSection />
-                <FeaturesSection />
+                <FeatureSection />
                 <CTA_Section />
                 <Footer />
             </div>

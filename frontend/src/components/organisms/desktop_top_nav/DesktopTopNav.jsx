@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { NavLink, Link } from 'react-router-dom'
 import { Bell, ChevronDown, Plus } from 'lucide-react'
-import Logo from '../../../../public/logo_astroseen.svg'
+import Logo from '../../atoms/logo/Logo.jsx'
 import Button from '../../atoms/button/Button'
 import Avatar from '../../atoms/avatar/Avatar'
 import { joinClassNames } from '../../../utils/joinClassNames.js'
@@ -21,7 +21,7 @@ const DesktopTopNav = () => {
         <header className={styles.header}>
             <div className={styles.leftGroup}>
                 <Link to="/" className={styles.logoLink}>
-                    <Logo size={28} />
+                    <Logo size={42} />
                     <span className={styles.wordmark}>ASTROSEEN</span>
                 </Link>
 
@@ -40,9 +40,9 @@ const DesktopTopNav = () => {
             </div>
 
             <div className={styles.rightGroup}>
-                <Button as={Link} to="/create" className={styles.createButton}>
+                <Button as={Link} to="/new-post" className={styles.createButton}>
                     <Plus size={16} strokeWidth={2.4} />
-                    Créer
+                    Nouveau post
                 </Button>
 
                 <button type="button" aria-label="Notifications" className={styles.bellButton}>

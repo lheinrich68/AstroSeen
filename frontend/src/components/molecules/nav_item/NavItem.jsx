@@ -1,8 +1,8 @@
 import { NavLink } from 'react-router-dom'
-import { joinClassNames } from '@/utils/joinClassNames'
+import { joinClassNames } from '../../../utils/joinClassNames.js'
 import styles from './NavItem.module.css'
 
-export default function NavItem({ to, icon: Icon, label, end = false }) {
+const NavItem = ({ to, icon: Icon, label, end = false }) => {
     return (
         <NavLink to={to} end={end} className={styles.link}>
             {({ isActive }) => (
@@ -14,3 +14,4 @@ export default function NavItem({ to, icon: Icon, label, end = false }) {
         </NavLink>
     )
 }
+export default NavItem

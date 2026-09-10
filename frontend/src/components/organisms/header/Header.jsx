@@ -5,7 +5,7 @@ import styles from './Header.module.css'
 
 // Sur mobile, seul "Se connecter" apparaît dans le header (le bouton
 // "S'inscrire" est réservé au desktop) — le CTA principal reste dans le hero.
-export default function Header() {
+const Header = () => {
     return (
         <header className={styles.header}>
             <Link to="/" className={styles.logoLink}>
@@ -24,3 +24,4 @@ export default function Header() {
         </header>
     )
 }
+export default Header

@@ -19,7 +19,7 @@ function generateStars(count) {
     }))
 }
 
-export default function StarField({ count = 80, className = '' }) {
+const StarField = ({ count = 80, className = '' }) => {
     const stars = useMemo(() => generateStars(count), [count])
 
     return (
@@ -42,3 +42,4 @@ export default function StarField({ count = 80, className = '' }) {
         </div>
     )
 }
+export default StarField

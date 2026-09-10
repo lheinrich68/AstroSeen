@@ -1,6 +1,6 @@
 import styles from './FeatureCard.module.css'
 
-export default function FeatureCard({ icon: Icon, title, description }) {
+const FeatureCard = ({ icon: Icon, title, description }) => {
     return (
         <div className={styles.card}>
             <div className={styles.iconWrapper}>
@@ -11,3 +11,4 @@ export default function FeatureCard({ icon: Icon, title, description }) {
         </div>
     )
 }
+export default FeatureCard

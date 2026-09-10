@@ -20,7 +20,7 @@ const FEATURES = [
     },
 ]
 
-export default function FeaturesSection() {
+const FeatureSection = () => {
     return (
         <section className={styles.section}>
             {FEATURES.map((feature) => (
@@ -29,3 +29,4 @@ export default function FeaturesSection() {
         </section>
     )
 }
+export default FeatureSection
