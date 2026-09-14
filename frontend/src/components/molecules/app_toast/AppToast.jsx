@@ -19,6 +19,7 @@ const AppToast = () => {
             transition={isMobile ? Flip : Slide}
             newestOnTop
             theme="dark"
+            style={{ '--toastify-toast-top': isMobile ? '16px' : '80px' }}
             toastStyle={{ background: 'var(--color-bg-surface-high)', color: 'var(--color-text-primary)' }}
         />
     )
