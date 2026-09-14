@@ -1,0 +1,49 @@
+.row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 14px 0;
+    text-align: left;
+}
+
+.left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.iconWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: var(--color-bg-surface-high);
+    color: var(--color-accent-signal);
+    flex-shrink: 0;
+}
+
+.textCol {
+    display: flex;
+    flex-direction: column;
+}
+
+.label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.subtitle {
+    font-size: 0.6875rem;
+    color: var(--color-text-muted);
+}
+
+.chevron {
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+}

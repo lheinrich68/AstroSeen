@@ -1,0 +1,15 @@
+.warningText {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+    margin: 0 0 20px;
+}
+
+.warningText strong {
+    color: var(--color-text-primary);
+}
+
+.buttonsRow {
+    display: flex;
+    gap: 12px;
+}

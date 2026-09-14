@@ -1,0 +1,82 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+}
+
+.trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    border-radius: 6px;
+    border: 1px solid rgba(139, 147, 167, 0.25);
+    background: var(--color-bg-surface-high);
+    padding: 10px 14px;
+    color: var(--color-text-primary);
+}
+
+.triggerLeft {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.875rem;
+}
+
+.triggerPlaceholder {
+    color: var(--color-text-muted);
+}
+
+.chevron {
+    color: var(--color-text-muted);
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    flex-shrink: 0;
+}
+
+.optionsList {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 10px 8px;
+    border-radius: 8px;
+    text-align: left;
+    font-size: 0.8125rem;
+    color: var(--color-text-primary);
+}
+.option:hover {
+    background: var(--color-bg-surface-high);
+}
+
+.optionSelected {
+    background: rgba(79, 216, 224, 0.1);
+}
+
+.optionValue {
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.optionDescription {
+    color: var(--color-text-muted);
+}

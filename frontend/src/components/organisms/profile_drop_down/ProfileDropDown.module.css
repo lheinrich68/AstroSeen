@@ -1,0 +1,55 @@
+.dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 220px;
+    background: var(--color-bg-surface);
+    border: 1px solid rgba(139, 147, 167, 0.15);
+    border-radius: 10px;
+    padding: 6px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    z-index: 40;
+    animation: dropdownIn 0.15s ease-out;
+}
+
+@keyframes dropdownIn {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dropdown {
+        animation: none;
+    }
+}
+
+.divider {
+    height: 1px;
+    background: rgba(139, 147, 167, 0.12);
+    border: none;
+    margin: 4px 0;
+}
+
+.logoutButton {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 10px 8px;
+    text-align: left;
+    color: var(--color-danger);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    border-radius: 8px;
+}
+.logoutButton:hover {
+    background: rgba(217, 89, 89, 0.1);
+}

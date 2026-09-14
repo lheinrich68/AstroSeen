@@ -1,0 +1,144 @@
+.page {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 20px 20px 40px;
+}
+@media (min-width: 768px) {
+    .page {
+        max-width: 560px;
+        padding: 40px 20px 60px;
+    }
+}
+
+.page > * {
+    animation: fadeInUp 0.6s ease-out both;
+}
+.page > *:nth-child(1) { animation-delay: 0s; }
+.page > *:nth-child(2) { animation-delay: 0.1s; }
+.page > *:nth-child(3) { animation-delay: 0.2s; }
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .page > * {
+        animation: none;
+    }
+}
+
+.backLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    margin-bottom: 16px;
+}
+.backLink:hover {
+    color: var(--color-text-primary);
+}
+
+.title {
+    font-size: 1.375rem;
+    color: var(--color-text-primary);
+    margin: 0 0 4px;
+}
+
+.legend {
+    font-size: 0.6875rem;
+    color: var(--color-text-muted);
+    margin: 0 0 20px;
+}
+
+.subtitle {
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+    margin: -12px 0 20px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.matchCard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: var(--color-bg-surface-high);
+    border: 1px solid rgba(79, 216, 224, 0.3);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-top: -4px;
+}
+
+.matchCardText {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.matchCardName {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.matchCardHint {
+    font-size: 0.6875rem;
+    color: var(--color-text-muted);
+}
+
+.matchCardButton {
+    background: none;
+    border: none;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-accent-signal);
+    flex-shrink: 0;
+}
+
+.helperText {
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+    margin-top: -8px;
+}
+
+.photoRow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 24px;
+    border-radius: 8px;
+    border: 1px dashed rgba(139, 147, 167, 0.35);
+    background: var(--color-bg-surface-high);
+}
+
+.photoButton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 0.8125rem;
+}
+
+.photoHint {
+    font-size: 0.6875rem;
+    color: var(--color-text-muted);
+    margin-top: -8px;
+}

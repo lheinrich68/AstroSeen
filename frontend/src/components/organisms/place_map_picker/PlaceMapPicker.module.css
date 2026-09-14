@@ -1,0 +1,42 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.searchRow {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+.searchRow > *:first-child {
+    flex: 1;
+}
+
+.locateButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    border-radius: 6px;
+    border: 1px solid rgba(139, 147, 167, 0.25);
+    background: var(--color-bg-surface-high);
+    color: var(--color-accent-signal);
+}
+.locateButton:hover {
+    background: rgba(79, 216, 224, 0.1);
+}
+
+.mapContainer {
+    height: 220px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.map {
+    height: 100%;
+    width: 100%;
+}

@@ -1,0 +1,56 @@
+.card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(139, 147, 167, 0.12);
+}
+.card:last-child {
+    border-bottom: none;
+}
+
+.headRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.name {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.chipsRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.chip {
+    background: var(--color-bg-surface-high);
+    color: var(--color-text-muted);
+    border-radius: 10px;
+    padding: 3px 9px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+}
+
+.actionsRow {
+    display: flex;
+    gap: 16px;
+}
+
+.actionButton {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-accent-signal);
+}
+
+.deleteButton {
+    color: var(--color-danger);
+}

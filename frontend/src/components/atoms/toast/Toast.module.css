@@ -1,0 +1,16 @@
+.toast {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.icon {
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.message {
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: var(--color-text-primary);
+}
