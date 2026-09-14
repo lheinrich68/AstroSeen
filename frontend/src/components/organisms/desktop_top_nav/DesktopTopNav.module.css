@@ -15,7 +15,7 @@
 .leftGroup {
     display: flex;
     align-items: center;
-    gap: 44px;
+    gap: 15px;
 }
 
 .logoLink {
@@ -29,6 +29,12 @@
     font-size: 1.3125rem;
     letter-spacing: 0.03em;
     color: var(--color-text-primary);
+}
+
+.divider {
+    width: 1px;
+    height: 22px;
+    background: rgba(139, 147, 167, 0.2);
 }
 
 .linksRow {

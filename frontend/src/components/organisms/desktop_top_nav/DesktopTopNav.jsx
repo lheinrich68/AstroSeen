@@ -24,6 +24,8 @@ const DesktopTopNav = () => {
                 <Logo size={42} />
                 <span className={styles.wordmark}>ASTROSEEN</span>
 
+                <div className={styles.divider} />
+
                 <nav className={styles.linksRow}>
                     {LINKS.map(({ to, label, end }) => (
                         <NavLink
