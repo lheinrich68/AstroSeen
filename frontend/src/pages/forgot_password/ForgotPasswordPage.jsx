@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Mail } from 'lucide-react'
-import { toast, ToastContainer } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+import { showToast } from "../../utils/showToast.jsx";
+import AppToast from "../../components/molecules/app_toast/AppToast.jsx";
 import Logo from '../../components/atoms/logo/Logo.jsx'
 import Input from '../../components/atoms/input/Input.jsx'
 import Button from '../../components/atoms/button/Button.jsx'
@@ -12,7 +12,7 @@ import styles from './ForgotPasswordPage.module.css'
 
 // PAS ENCORE branché à un backend — la soumission simule l'envoi du lien
 // (toast + redirection vers l'écran de vérification). À remplacer par un
-// vrai appel API (POST /auth/forgot-password) une fois l'endpoint dispo.
+// appel API (POST /auth/forgot-password) une fois l'endpoint dispo.
 const ForgotPasswordPage = () => {
     const [email, setEmail] = useState('')
     const [submitting, setSubmitting] = useState(false)
@@ -24,7 +24,7 @@ const ForgotPasswordPage = () => {
 
         // TODO: remplacer par un vrai appel API (POST /auth/forgot-password).
         setTimeout(() => {
-            toast.success('Lien envoyé si un compte existe avec cet email.')
+            showToast.success('Lien envoyé si un compte existe avec cet email.')
             setSubmitting(false)
             navigate('/verification-reset', { state: { email } })
         }, 600)
@@ -73,11 +73,7 @@ const ForgotPasswordPage = () => {
 
             <Footer />
 
-            <ToastContainer
-                position="bottom-right"
-                theme="dark"
-                toastStyle={{ background: 'var(--color-bg-surface-high)', color: 'var(--color-text-primary)' }}
-            />
+            <AppToast />
         </div>
     )
 }

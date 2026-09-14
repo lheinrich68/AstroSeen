@@ -1,8 +1,7 @@
 import { Outlet } from 'react-router-dom'
-import { ToastContainer } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
 import DesktopTopNav from '../components/organisms/desktop_top_nav/DesktopTopNav.jsx'
 import MobileBottomNav from '../components/organisms/mobile_bottom_nav/MobileBottomNav.jsx'
+import AppToast from '../components/molecules/app_toast/AppToast.jsx'
 import styles from './AppLayout.module.css'
 
 // Shell des pages authentifiées (mobile : nav basse fixe ; desktop : barre
@@ -20,11 +19,7 @@ const AppLayout = () => {
 
             <MobileBottomNav />
 
-            <ToastContainer
-                position="bottom-right"
-                theme="dark"
-                toastStyle={{ background: 'var(--color-bg-surface-high)', color: 'var(--color-text-primary)' }}
-            />
+            <AppToast />
         </div>
     )
 }

@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Mail } from 'lucide-react'
-import { toast, ToastContainer } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+import { showToast } from "../../utils/showToast.jsx";
+import AppToast from "../../components/molecules/app_toast/AppToast.jsx";
 import Input from '../../components/atoms/input/Input.jsx'
 import Select from '../../components/atoms/select/Select.jsx'
 import Textarea from '../../components/atoms/text_area/TextArea.jsx'
@@ -36,9 +36,9 @@ const ContactPage = () => {
         e.preventDefault()
         setSubmitting(true)
 
-        // TODO: remplacer par un vrai appel API une fois l'endpoint disponible.
+        // TODO: remplacer par un appel API une fois l'endpoint disponible.
         setTimeout(() => {
-            toast.success('Votre message à été envoyé.')
+            showToast.success('Votre message à bien été envoyé.')
             setSubmitting(false)
             e.target.reset()
         }, 600)
@@ -82,11 +82,7 @@ const ContactPage = () => {
             </div>
             <Footer />
 
-            <ToastContainer
-                position="bottom-right"
-                theme="dark"
-                toastStyle={{ background: 'var(--color-bg-surface-high)', color: 'var(--color-text-primary)' }}
-            />
+            <AppToast />
         </div>
     )
 }

@@ -4,6 +4,7 @@ import { Bell, ChevronDown, Plus } from 'lucide-react'
 import Logo from '../../atoms/logo/Logo.jsx'
 import Button from '../../atoms/button/Button'
 import Avatar from '../../atoms/avatar/Avatar'
+import ProfileDropdown from '../../organisms/profile_drop_down/ProfileDropDown.jsx'
 import { joinClassNames } from '../../../utils/joinClassNames.js'
 import styles from './DesktopTopNav.module.css'
 
@@ -20,10 +21,8 @@ const DesktopTopNav = () => {
     return (
         <header className={styles.header}>
             <div className={styles.leftGroup}>
-                <Link to="/" className={styles.logoLink}>
-                    <Logo size={42} />
-                    <span className={styles.wordmark}>ASTROSEEN</span>
-                </Link>
+                <Logo size={42} />
+                <span className={styles.wordmark}>ASTROSEEN</span>
 
                 <nav className={styles.linksRow}>
                     {LINKS.map(({ to, label, end }) => (
@@ -49,15 +48,19 @@ const DesktopTopNav = () => {
                     <Bell size={20} />
                 </button>
 
-                <button
-                    type="button"
-                    onClick={() => setMenuOpen((v) => !v)}
-                    className={styles.profileButton}
-                    aria-expanded={menuOpen}
-                >
-                    <Avatar size={32} className={styles.avatar} />
-                    <ChevronDown size={16} className={styles.chevron} />
-                </button>
+                <div className={styles.profileWrapper}>
+                    <button
+                        type="button"
+                        onClick={() => setMenuOpen((v) => !v)}
+                        className={styles.profileButton}
+                        aria-expanded={menuOpen}
+                    >
+                        <Avatar size={32} className={styles.avatar} />
+                        <ChevronDown size={16} className={styles.chevron} />
+                    </button>
+
+                    {menuOpen && <ProfileDropdown onClose={() => setMenuOpen(false)} />}
+                </div>
             </div>
         </header>
     )

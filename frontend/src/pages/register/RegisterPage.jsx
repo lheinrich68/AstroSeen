@@ -1,14 +1,15 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { User, Mail, Lock } from 'lucide-react'
-import { toast, ToastContainer } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+import { showToast } from "../../utils/showToast.jsx";
+import AppToast from "../../components/molecules/app_toast/AppToast.jsx";
 import Logo from '../../components/atoms/logo/Logo.jsx'
 import Input from '../../components/atoms/input/Input.jsx'
 import Checkbox from '../../components/atoms/checkbox/Checkbox.jsx'
 import Button from '../../components/atoms/button/Button.jsx'
 import StarField from '../../components/atoms/star_field/StarField.jsx'
 import PasswordChecklist, { isPasswordValid } from '../../components/molecules/password_checklist/PasswordChecklist.jsx'
+import Footer from '../../components/organisms/footer/Footer.jsx'
 import styles from './RegisterPage.module.css'
 
 // PAS ENCORE branché à un backend -> la soumission simule juste une
@@ -28,22 +29,22 @@ const RegisterPage = () => {
         e.preventDefault()
 
         if (!isPasswordValid(password)) {
-            toast.error('Le mot de passe ne respecte pas encore toutes les règlementations.')
+            showToast.error('Le mot de passe ne respecte pas encore toutes les règlementations.')
             return
         }
         if (password !== confirmPassword) {
-            toast.error('Les deux mots de passe ne correspondent pas.')
+            showToast.error('Les deux mots de passe ne correspondent pas.')
             return
         }
         if (!acceptedTerms) {
-            toast.error("Tu dois accepter les Conditions Générales d'Utilisation ainsi que la politique de confidentialité.")
+            showToast.error("Tu dois accepter les Conditions Générales d'Utilisation et la politique de confidentialité.")
             return
         }
 
         setSubmitting(true)
         // TODO: remplacer par un vrai appel API (POST /auth/register).
         setTimeout(() => {
-            toast.success('Compte créé — vérifie ta boîte mail pour confirmer ton adresse.')
+            showToast.success('Compte créé — vérifie ta boîte mail pour confirmer ton adresse.')
             setSubmitting(false)
             navigate('/verification-email', { state: { email } })
         }, 600)
@@ -56,7 +57,7 @@ const RegisterPage = () => {
             <div className={styles.main}>
                 <div className={styles.content}>
                     <Link to="/" className={styles.logoLink}>
-                        <Logo size={28} />
+                        <Logo size={56} />
                         <span className={styles.wordmark}>ASTROSEEN</span>
                     </Link>
 
@@ -65,7 +66,7 @@ const RegisterPage = () => {
                         <p className={styles.legend}>* Champ obligatoire</p>
 
                         <form className={styles.form} onSubmit={handleSubmit}>
-                            <Input label="Pseudo *" name="pseudo" icon={User} placeholder="VotrePseudonyme" required />
+                            <Input label="Pseudo *" name="pseudo" icon={User} placeholder="Votre pseudonyme" required />
                             <Input
                                 label="Email *"
                                 name="email"
@@ -120,17 +121,14 @@ const RegisterPage = () => {
                         </form>
 
                         <p className={styles.loginText}>
-                            Déjà un compte ? <Link to="/connexion">Se connecter</Link>
+                            Déjà un compte ? <Link to="/login">Se connecter</Link>
                         </p>
                     </div>
                 </div>
             </div>
+            <Footer />
 
-            <ToastContainer
-                position="bottom-right"
-                theme="dark"
-                toastStyle={{ background: 'var(--color-bg-surface-high)', color: 'var(--color-text-primary)' }}
-            />
+            <AppToast />
         </div>
     )
 }

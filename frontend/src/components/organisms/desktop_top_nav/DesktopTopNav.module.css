@@ -87,3 +87,7 @@
 .chevron {
     color: var(--color-text-muted);
 }
+
+.profileWrapper {
+    position: relative;
+}

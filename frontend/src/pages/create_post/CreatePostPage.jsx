@@ -1,8 +1,7 @@
 import { useState } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { Link2, X } from "lucide-react"
-import { toast, ToastContainer } from "react-toastify"
-import 'react-toastify/dist/ReactToastify.css'
+import { showToast } from "../../utils/showToast.jsx";
 import Avatar from "../../components/atoms/avatar/Avatar.jsx";
 import Button from "../../components/atoms/button/Button.jsx";
 import ChooseContentModal from "../../components/organisms/modals/choose_content_modal/ChooseContentModal.jsx";
@@ -25,7 +24,7 @@ const CreatePostPage = () => {
 
     const handlePublish = () => {
         if (!text.trim()) {
-            toast.error('Écrivez quelque chose avant de publier.')
+            showToast.error('Écrivez quelque chose avant de publier.')
             return
         }
 
@@ -33,7 +32,7 @@ const CreatePostPage = () => {
         // TODO: remplacer par un vrai appel API (POST /posts), avec
         // linkedContent?.id transmis si un contenu est lié.
         setTimeout(() => {
-            toast.success('Post publié.')
+            showToast.success('Post publié.')
             setSubmitting(false)
             navigate('/feed')
         }, 600)
@@ -109,12 +108,6 @@ const CreatePostPage = () => {
                     onClose={() => setPickerOpen(false)}
                 />
             )}
-
-            <ToastContainer
-                position="bottom-right"
-                theme="dark"
-                toastStyle={{ background: 'var(--color-bg-surface-high)', color: 'var(--color-text-primary)' }}
-            />
         </div>
     )
 }

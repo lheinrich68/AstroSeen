@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { toast } from "react-toastify";
+import { showToast} from "../../../../utils/showToast.jsx";
 import Modal from "../../../molecules/modal/Modal.jsx";
 import RadioButton from "../../../atoms/radio_button/RadioButton.jsx";
 import TextArea from "../../../atoms/text_area/TextArea.jsx";
@@ -20,20 +20,19 @@ const REASONS = [
 //  une fois l'endpoint disponible.
 
 const ReportContentModal = ({ onClose }) => {
-    const [reason, setReason] = useState(REASONS[0]);
-    const [precision, setPrecision] = useState('');
-    const [submitting, setSubmitting] = useState(false);
+    const [reason, setReason] = useState(REASONS[0])
+    const [precision, setPrecision] = useState('')
+    const [submitting, setSubmitting] = useState(false)
 
     const handleSubmit = (requestClose) => {
         setSubmitting(true);
         // TODO: remplacer par un appel API (POST /reports).
 
         setTimeout(() => {
-            toast.success('Votre signalement à été envoyé à l\'équipe de modération.')
-            setSubmitting(false);
-            requestClose();
-            }, 500
-        )
+            showToast.success('Votre signalement à été envoyé à l\'équipe de modération.')
+            setSubmitting(false)
+            requestClose()
+        }, 500)
     }
 
     return (

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
-import { toast } from 'react-toastify'
+import { showToast } from "../../../../utils/showToast.jsx";
 import Modal from '../../../molecules/modal/Modal.jsx'
 import Tabs from '../../../molecules/tabs/Tabs.jsx'
 import styles from './ChooseContentModal.module.css'
@@ -39,7 +39,7 @@ const ChooseContentModal = ({ onSelect, onClose }) => {
 
     const handleAdd = () => {
         // TODO: rediriger vers le flux d'ajout correspondant une fois ces écrans construits.
-        toast.info("Flux d'ajout pas encore disponible.")
+        showToast.warning("Flux d'ajout pas encore disponible.")
     }
 
     return (

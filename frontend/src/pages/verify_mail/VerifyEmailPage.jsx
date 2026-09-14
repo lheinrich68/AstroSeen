@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Mail } from 'lucide-react'
-import { toast, ToastContainer } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+import { showToast } from "../../utils/showToast.jsx";
+import AppToast from "../../components/molecules/app_toast/AppToast.jsx";
 import Logo from '../../components/atoms/logo/Logo.jsx'
 import Button from '../../components/atoms/button/Button.jsx'
 import StarField from '../../components/atoms/star_field/StarField.jsx'
@@ -24,9 +24,9 @@ const VerifyEmailPage = () => {
         setResending(true)
         // TODO: remplacer par un vrai appel API (POST /auth/resend-verification).
         setTimeout(() => {
-            toast.info('Email de vérification renvoyé.')
+            showToast.success('Email de vérification renvoyé.')
             setResending(false)
-            setCooldown(60)
+            setCooldown(30)
             const interval = setInterval(() => {
                 setCooldown((c) => {
                     if (c <= 1) {
@@ -62,7 +62,9 @@ const VerifyEmailPage = () => {
                             {email ? <strong>{email}</strong> : 'ton adresse email'}. Clique dessus pour activer ton
                             compte.
                         </p>
-                        <p className={styles.description}>Le lien expire dans 24h.</p>
+                        <p className={styles.description}>
+                            Le lien expire dans 15 minutes.
+                        </p>
 
                         <Button
                             variant="outline"
@@ -78,11 +80,7 @@ const VerifyEmailPage = () => {
 
             <Footer />
 
-            <ToastContainer
-                position="bottom-right"
-                theme="dark"
-                toastStyle={{ background: 'var(--color-bg-surface-high)', color: 'var(--color-text-primary)' }}
-            />
+            <AppToast />
         </div>
     )
 }

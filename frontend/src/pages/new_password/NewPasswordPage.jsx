@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Lock, AlertTriangle } from 'lucide-react'
-import { toast, ToastContainer } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+import { showToast } from "../../utils/showToast.jsx";
+import AppToast from "../../components/molecules/app_toast/AppToast.jsx";
 import Logo from '../../components/atoms/logo/Logo.jsx'
 import Input from '../../components/atoms/input/Input.jsx'
 import Button from '../../components/atoms/button/Button.jsx'
@@ -22,13 +22,13 @@ import styles from './NewPasswordPage.module.css'
 //    état de chargement pendant la vérification.
 
 // Dans les deux cas d'échec, même message générique ("Lien invalide ou
-// expiré") plutôt que de préciser lequel — ne pas donner d'indice qui
+// expiré") plutôt que de préciser lequel -> ne pas donner d'indice qui
 // faciliterait une énumération de tokens/emails.
 
-// TODO: remplacer verifyToken() par un vrai appel
-// GET /auth/reset-password/:token qui renvoie valide/invalide. Pour
-// l'instant, tout token présent est traité comme valide (à ajuster une fois
-// le backend en place).
+// TODO: remplacer verifyToken() par un appel
+//  GET /auth/reset-password/:token qui renvoie valide/invalide. Pour
+//  l'instant, tout token présent est traité comme valide (à ajuster une fois
+//  le backend en place).
 
 async function verifyToken(token) {
     await new Promise((resolve) => setTimeout(resolve, 500))
@@ -58,23 +58,21 @@ export default function NewPasswordPage() {
         e.preventDefault()
 
         if (!isPasswordValid(password)) {
-            toast.error('Le mot de passe ne respecte pas encore toutes les règlementations.')
+            showToast.error('Le mot de passe ne respecte pas encore toutes les règlementations.')
             return
         }
         if (password !== confirmPassword) {
-            toast.error('Les deux mots de passe ne correspondent pas.')
+            showToast.error('Les deux mots de passe ne correspondent pas.')
             return
         }
 
         setSubmitting(true)
-
-// TODO: remplacer par un vrai appel API — POST /auth/reset-password
-// avec { token, password }. Le backend doit rejeter un token invalide,
-// expiré ou déjà consommé (message générique, sans révéler lequel de
-// ces cas s'applique, pour ne pas faciliter une énumération).
-
+        // TODO: remplacer par un appel API — POST /auth/reset-password
+        //  avec { token, password }. Le backend doit rejeter un token invalide,
+        //  expiré ou déjà consommé (message générique, sans révéler lequel de
+        //  ces cas s'applique, pour ne pas faciliter une énumération).
         setTimeout(() => {
-            toast.success('Mot de passe réinitialisé.\nConnectez-vous avec votre nouveau mot de passe.')
+            showToast.success('Mot de passe réinitialisé. Connectez-vous avec votre nouveau mot de passe.')
             setSubmitting(false)
             navigate('/login')
         }, 600)
@@ -87,7 +85,7 @@ export default function NewPasswordPage() {
                 <div className={styles.main}>
                     <div className={styles.content}>
                         <Link to="/" className={styles.logoLink}>
-                            <Logo size={56} />
+                            <Logo size={28} />
                             <span className={styles.wordmark}>ASTROSEEN</span>
                         </Link>
                         <div className={`${styles.card} ${styles.errorCard}`}>
@@ -116,7 +114,7 @@ export default function NewPasswordPage() {
                             </div>
                             <h1 className={styles.title}>Lien invalide ou expiré</h1>
                             <p className={styles.description}>
-                                Ce lien de réinitialisation n'est plus valable. Demandez un nouveau lien pour choisir un
+                                Ce lien de réinitialisation n'est plus valable. Demande un nouveau lien pour choisir un
                                 mot de passe.
                             </p>
                             <Button as={Link} to="/forgot-password">
@@ -137,7 +135,7 @@ export default function NewPasswordPage() {
             <div className={styles.main}>
                 <div className={styles.content}>
                     <Link to="/" className={styles.logoLink}>
-                        <Logo size={28} />
+                        <Logo size={56} />
                         <span className={styles.wordmark}>ASTROSEEN</span>
                     </Link>
 
@@ -181,11 +179,7 @@ export default function NewPasswordPage() {
 
             <Footer />
 
-            <ToastContainer
-                position="bottom-right"
-                theme="dark"
-                toastStyle={{ background: 'var(--color-bg-surface-high)', color: 'var(--color-text-primary)' }}
-            />
+            <AppToast />
         </div>
     )
 }
