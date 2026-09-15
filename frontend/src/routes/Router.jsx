@@ -23,6 +23,8 @@ import MyPlacesPage from "../pages/my_places/MyPlacesPage.jsx";
 import NewPlacePage from "../pages/new_place/NewPlacePage.jsx";
 import NewEquipmentPage from "../pages/new_equipment/NewEquipmentPage.jsx";
 import SetPage from "../pages/set_page/SetPage.jsx";
+import ReviewReportPage from "../pages/review_report/ReviewReportPage.jsx";
+import ReportsQueuePage from "../pages/reports_queue/ReportsQueuePage.jsx";
 
 const Router = () => {
     return (
@@ -57,6 +59,8 @@ const Router = () => {
                 <Route path="/my-places" element={<MyPlacesPage />} />
                 <Route path="/my-places/new" element={<NewPlacePage />} />
                 <Route path="/my-places/:id/edit" element={<NewPlacePage />} />
+                <Route path="/moderation" element={<ReportsQueuePage />} />
+                <Route path="/moderation/:id" element={<ReviewReportPage />} />
             </Route>
         </Routes>
     )

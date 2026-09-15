@@ -61,7 +61,7 @@ const ProfilePage = () => {
                 {MOCK_USER.isModerator && (
                     <>
                         <hr className={styles.divider} />
-                        <MenuRow to="/moderator" icon={Shield} label="Modération" subtitle="Accéder au panel de modération" />
+                        <MenuRow to="/moderation" icon={Shield} label="Modération" subtitle="Accéder au panel de modération" />
                     </>
                 )}
                 {MOCK_USER.isAdmin && (

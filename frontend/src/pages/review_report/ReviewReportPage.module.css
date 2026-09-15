@@ -1,0 +1,169 @@
+.page {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 20px 20px 40px;
+}
+@media (min-width: 768px) {
+    .page {
+        max-width: 680px;
+        padding: 40px 20px 60px;
+    }
+}
+
+.page > * {
+    animation: fadeInUp 0.6s ease-out both;
+}
+.page > *:nth-child(1) { animation-delay: 0s; }
+.page > *:nth-child(2) { animation-delay: 0.1s; }
+.page > *:nth-child(3) { animation-delay: 0.2s; }
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .page > * {
+        animation: none;
+    }
+}
+
+.backLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    margin-bottom: 16px;
+}
+.backLink:hover {
+    color: var(--color-text-primary);
+}
+
+.title {
+    font-size: 1.375rem;
+    color: var(--color-text-primary);
+    margin: 0 0 16px;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.contentCard {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--color-bg-surface);
+    border-radius: 10px;
+    padding: 14px;
+}
+
+.authorRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.authorName {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.contentImage {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 6px;
+    background: var(--color-bg-surface-high);
+}
+
+.contentMeta {
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+}
+
+.sectionTitle {
+    font-size: 1rem;
+    color: var(--color-text-primary);
+    margin: 0 0 4px;
+}
+
+.reportsList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.reportRow {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.reportHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.reportAuthor {
+    font-size: 0.8125rem;
+    color: var(--color-text-primary);
+}
+
+.reportChip {
+    background: rgba(217, 89, 89, 0.12);
+    color: var(--color-danger);
+    border-radius: 10px;
+    padding: 3px 9px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+}
+
+.reportDetail {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+.actionsList {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.radioRow {
+    padding: 6px 0;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.banRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8125rem;
+    color: var(--color-danger);
+    background: none;
+    border: none;
+    align-self: flex-start;
+}
+
+.banButtonsRow {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
