@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom'
-import DesktopTopNav from '../components/organisms/desktop_top_nav/DesktopTopNav.jsx'
-import MobileBottomNav from '../components/organisms/mobile_bottom_nav/MobileBottomNav.jsx'
-import AppToast from '../components/molecules/app_toast/AppToast.jsx'
+import DesktopTopNav from '../../components/organisms/desktop_top_nav/DesktopTopNav.jsx'
+import MobileBottomNav from '../../components/organisms/mobile_bottom_nav/MobileBottomNav.jsx'
+import AppToast from '../../components/molecules/app_toast/AppToast.jsx'
 import styles from './AppLayout.module.css'
 
 // Shell des pages authentifiées (mobile : nav basse fixe ; desktop : barre

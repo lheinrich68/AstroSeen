@@ -11,7 +11,7 @@ import VerifResetPage from "../pages/verif_reset/VerifResetPage.jsx";
 import NewPasswordPage from "../pages/new_password/NewPasswordPage.jsx";
 import VerifAccountPage from "../pages/activation_compte/VerifAccountPage.jsx";
 import FeedPage from "../pages/feed/FeedPage.jsx";
-import AppLayout from "../layouts/AppLayout.jsx";
+import AppLayout from "../layouts/app_layout/AppLayout.jsx";
 import PostDetailPage from "../pages/post_detail/PostDetailPage.jsx";
 import CreatePostPage from "../pages/create_post/CreatePostPage.jsx";
 import ProfilePage from "../pages/profile/ProfilePage.jsx";
@@ -26,6 +26,8 @@ import SetPage from "../pages/set_page/SetPage.jsx";
 import ReviewReportPage from "../pages/review_report/ReviewReportPage.jsx";
 import ReportsQueuePage from "../pages/reports_queue/ReportsQueuePage.jsx";
 import AdminDashboardPage from "../pages/admin_dashboard/AdminDashboardPage.jsx";
+import AdminLayout from "../layouts/admin_layout/AdminLayout.jsx";
+import StatisticsPage from "../pages/statistics/StatisticsPage.jsx";
 
 const Router = () => {
     return (
@@ -62,7 +64,11 @@ const Router = () => {
                 <Route path="/my-places/:id/edit" element={<NewPlacePage />} />
                 <Route path="/moderation" element={<ReportsQueuePage />} />
                 <Route path="/moderation/:id" element={<ReviewReportPage />} />
-                <Route path="/admin" element={<AdminDashboardPage />} />
+
+                <Route element={<AdminLayout />}>
+                    <Route path="/admin" element={<AdminDashboardPage />} />
+                    <Route path="/admin/statistics" element={<StatisticsPage />} />
+                </Route>
             </Route>
         </Routes>
     )

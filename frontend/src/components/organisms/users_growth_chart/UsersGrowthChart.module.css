@@ -15,3 +15,8 @@
 .chartWrapper {
     height: 220px;
 }
+@media (min-width: 768px) {
+    .chartWrapper {
+        height: 320px;
+    }
+}
