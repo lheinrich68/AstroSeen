@@ -28,7 +28,7 @@ const DistributionChart = ({ title, segments }) => {
         // du tracé se joue pendant que la carte est encore invisible (opacité 0
         // via notre cascade CSS d'entrée), donc jamais vue.
         animation: {
-            delay: 500,
+            delay: 1000,
         },
         plugins: {
             legend: { display: false },
