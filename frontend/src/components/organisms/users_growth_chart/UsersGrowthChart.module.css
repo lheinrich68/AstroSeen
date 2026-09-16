@@ -1,0 +1,17 @@
+.card {
+    background: var(--color-bg-surface);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+.title {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0 0 12px;
+}
+
+.chartWrapper {
+    height: 220px;
+}

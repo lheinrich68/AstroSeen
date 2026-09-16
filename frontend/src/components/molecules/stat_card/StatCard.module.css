@@ -1,0 +1,54 @@
+/* Inspiré du "small-box" d'AdminLTE (adminlte.io) : icône fantôme géante en
+   coin, lien de pied de carte — transposé à notre thème sombre via une
+   bordure colorée plutôt que leurs blocs de couleur saturée pleine, qui
+   jureraient avec la charte. */
+.card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow: hidden;
+    min-height: 96px;
+    background: var(--color-bg-surface);
+    border-left: 3px solid var(--stat-color, var(--color-accent-signal));
+    border-radius: 10px;
+    padding: 16px;
+}
+
+.ghostIcon {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    color: var(--stat-color, var(--color-accent-signal));
+    opacity: 0.15;
+}
+
+.value {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    color: var(--color-text-primary);
+    position: relative;
+    z-index: 1;
+}
+
+.label {
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+    position: relative;
+    z-index: 1;
+}
+
+.footerLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--stat-color, var(--color-accent-signal));
+    position: relative;
+    z-index: 1;
+}
+.footerLink:hover {
+    opacity: 0.85;
+}
