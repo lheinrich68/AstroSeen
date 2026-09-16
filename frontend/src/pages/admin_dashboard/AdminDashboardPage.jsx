@@ -4,6 +4,14 @@ import MenuRow from "../../components/molecules/menu_row/MenuRow.jsx";
 import UsersGrowthChart from "../../components/organisms/users_growth_chart/UsersGrowthChart.jsx";
 import styles from "./AdminDashboardPage.module.css"
 
+// Palette étendue pour les cartes de stats uniquement -> pas des tokens de
+// charte graphique globale, juste des couleurs de repère supplémentaires
+// (jaune/vert/bleu/violet) en plus de nos 3 accents (signal/starlight/danger).
+const YELLOW = '#e8d16a'
+const GREEN = '#5fd98a'
+const BLUE = '#5b9ee8'
+const GRAY = 'var(--color-text-muted)'
+
 //* PAS ENCORE branché à un backend — statistiques en dur.
 //TODO: À remplacer par un vrai appel API (GET /admin/stats) une fois l'endpoint
 //     disponible.
@@ -16,9 +24,9 @@ import styles from "./AdminDashboardPage.module.css"
 //  StatisticsPage, accessible via /administration/statistiques.
 const MOCK_STATS = [
     { value: '1 284', label: 'Utilisateurs actifs', icon: Users, color: 'var(--color-accent-signal)' },
-    { value: '186', label: 'Utilisateurs actifs (jour)', icon: Activity, color: 'var(--color-accent-signal)' },
-    { value: '+23', label: 'Nouvelles inscriptions (semaine)', icon: UserPlus, color: 'var(--color-accent-starlight)' },
-    { value: '57', label: 'Sessions ce mois', icon: Calendar, color: 'var(--color-accent-starlight)' },
+    { value: '186', label: 'Utilisateurs actifs (jour)', icon: Activity, color: YELLOW },
+    { value: '+23', label: 'Nouvelles inscriptions (semaine)', icon: UserPlus, color: GREEN },
+    { value: '57', label: 'Sessions ce mois', icon: Calendar, color: BLUE },
     {
         value: '4',
         label: 'Signalements en attente',
@@ -30,7 +38,7 @@ const MOCK_STATS = [
         value: '2',
         label: 'Demandes de suppression',
         icon: UserX,
-        color: 'var(--color-accent-signal)',
+        color: GRAY,
         to: '/administration/suppressions',
     },
 ]

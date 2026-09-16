@@ -46,16 +46,17 @@
     display: grid;
     grid-template-columns: 1fr;
     gap: 12px;
-    margin-bottom: 12px;
+    margin: 0 auto 12px;
 }
 @media (min-width: 480px) {
     .statsRow {
         grid-template-columns: 1fr 1fr;
     }
 }
-@media (min-width: 1100px) {
+@media (min-width: 900px) {
     .statsRow {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(3, 1fr);
+        max-width: 1000px;
     }
 }
 

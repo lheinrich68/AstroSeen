@@ -61,6 +61,9 @@ const UsersGrowthChart = () => {
     const options = {
         responsive: true,
         maintainAspectRatio: false,
+        animation: {
+            delay: 850,
+        },
         plugins: {
             legend: { display: false },
             tooltip: {

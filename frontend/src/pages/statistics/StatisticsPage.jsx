@@ -15,28 +15,34 @@ import StatCard from "../../components/molecules/stat_card/StatCard.jsx";
 import DistributionChart from "../../components/organisms/distribution_chart/DistributionChart.jsx";
 import styles from "./StatisticsPage.module.css"
 
-// PAS ENCORE branché à un backend -> statistiques en dur.
-// À remplacer par un vrai appel API (GET /admin/stats/detailed) une fois
-// l'endpoint disponible.
+const YELLOW = '#e8d16a'
+const GREEN = '#5fd98a'
+const GRAY = 'var(--color-text-muted)'
+const WHITE = 'var(--color-text-primary)'
+const PURPLE = '#a084e0'
+
+//* PAS ENCORE branché à un backend -> statistiques en dur.
+//TODO: À remplacer par un appel API (GET /admin/stats/detailed) une fois
+//      l'endpoint disponible.
 const ENGAGEMENT_STATS = [
-    { value: '142 (+8%)', label: 'Publications cette semaine', icon: FileText, color: 'var(--color-accent-signal)' },
+    { value: '142 (+8%)', label: 'Publications cette semaine', icon: FileText, color: GRAY },
     { value: '6,4', label: 'Likes moyens par publication', icon: Heart, color: 'var(--color-danger)' },
-    { value: '2,1', label: 'Commentaires moyens par publication', icon: MessageCircle, color: 'var(--color-accent-starlight)' },
+    { value: '2,1', label: 'Commentaires moyens par publication', icon: MessageCircle, color: WHITE },
 ]
 
 const GROWTH_STATS = [
-    { value: '68 %', label: 'Taux de rétention (30 jours)', icon: Repeat, color: 'var(--color-accent-signal)' },
+    { value: '68 %', label: 'Taux de rétention (30 jours)', icon: Repeat, color: YELLOW },
     { value: '5', label: 'Comptes supprimés ce mois', icon: UserMinus, color: 'var(--color-danger)' },
 ]
 
 const CONTENT_STATS = [
-    { value: '34', label: "Sessions d'observation créées ce mois", icon: Telescope, color: 'var(--color-accent-starlight)' },
-    { value: '47', label: 'Astronomes certifiés (total)', icon: Award, color: 'var(--color-accent-signal)' },
+    { value: '34', label: "Sessions d'observation créées ce mois", icon: Telescope, color: PURPLE },
+    { value: '47', label: 'Astronomes certifiés (total)', icon: Award, color: YELLOW },
 ]
 
 const MODERATION_STATS = [
     { value: '4,2 h', label: "Temps moyen de traitement d'un signalement", icon: Clock, color: 'var(--color-accent-starlight)' },
-    { value: '68 %', label: 'Signalements validés (vs rejetés)', icon: CheckCircle2, color: 'var(--color-accent-signal)' },
+    { value: '68 %', label: 'Signalements validés (vs rejetés)', icon: CheckCircle2, color: GREEN },
 ]
 
 const LEVEL_DISTRIBUTION = [

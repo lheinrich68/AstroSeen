@@ -24,6 +24,12 @@ const DistributionChart = ({ title, segments }) => {
         responsive: true,
         maintainAspectRatio: false,
         cutout: '68%',
+        // Délai avant que chart.js ne dessine le donut — sans ça, l'animation
+        // du tracé se joue pendant que la carte est encore invisible (opacité 0
+        // via notre cascade CSS d'entrée), donc jamais vue.
+        animation: {
+            delay: 500,
+        },
         plugins: {
             legend: { display: false },
             tooltip: {
