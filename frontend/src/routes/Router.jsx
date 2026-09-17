@@ -28,6 +28,7 @@ import ReportsQueuePage from "../pages/reports_queue/ReportsQueuePage.jsx";
 import AdminDashboardPage from "../pages/admin_dashboard/AdminDashboardPage.jsx";
 import AdminLayout from "../layouts/admin_layout/AdminLayout.jsx";
 import StatisticsPage from "../pages/statistics/StatisticsPage.jsx";
+import CertificationPage from "../pages/certification/CertificationPage.jsx";
 
 const Router = () => {
     return (
@@ -68,6 +69,7 @@ const Router = () => {
                 <Route element={<AdminLayout />}>
                     <Route path="/admin" element={<AdminDashboardPage />} />
                     <Route path="/admin/statistics" element={<StatisticsPage />} />
+                    <Route path="/admin/certification" element={<CertificationPage />} />
                 </Route>
             </Route>
         </Routes>
