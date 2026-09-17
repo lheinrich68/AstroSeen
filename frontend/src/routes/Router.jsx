@@ -30,6 +30,8 @@ import AdminLayout from "../layouts/admin_layout/AdminLayout.jsx";
 import StatisticsPage from "../pages/statistics/StatisticsPage.jsx";
 import CertificationPage from "../pages/certification/CertificationPage.jsx";
 import DeletionsPage from "../pages/deletions/DeletionsPage.jsx";
+import ReferenceTablesListPage from "../pages/reference_tables_list/ReferenceTablesListPage.jsx";
+import ManageReferenceTablePage from "../pages/manage_reference_table/ManageReferenceTablePage.jsx";
 
 const Router = () => {
     return (
@@ -72,6 +74,9 @@ const Router = () => {
                     <Route path="/admin/statistics" element={<StatisticsPage />} />
                     <Route path="/admin/certification" element={<CertificationPage />} />
                     <Route path="/admin/deletions" element={<DeletionsPage />} />
+                    <Route path="/admin/reference-tables" element={<ReferenceTablesListPage />} />
+                    <Route path="/admin/reference-tables/:slug" element={<ManageReferenceTablePage />} />
+
                 </Route>
             </Route>
         </Routes>
