@@ -32,6 +32,8 @@ import CertificationPage from "../pages/certification/CertificationPage.jsx";
 import DeletionsPage from "../pages/deletions/DeletionsPage.jsx";
 import ReferenceTablesListPage from "../pages/reference_tables_list/ReferenceTablesListPage.jsx";
 import ManageReferenceTablePage from "../pages/manage_reference_table/ManageReferenceTablePage.jsx";
+import EventsListPage from "../pages/events_list/EventsListPage.jsx";
+import EventFormPage from "../pages/event_form/EventFormPage.jsx";
 
 const Router = () => {
     return (
@@ -76,7 +78,9 @@ const Router = () => {
                     <Route path="/admin/deletions" element={<DeletionsPage />} />
                     <Route path="/admin/reference-tables" element={<ReferenceTablesListPage />} />
                     <Route path="/admin/reference-tables/:slug" element={<ManageReferenceTablePage />} />
-
+                    <Route path="/admin/events" element={<EventsListPage />} />
+                    <Route path="/admin/events/new" element={<EventFormPage />} />
+                    <Route path="/admin/events/:id/edit" element={<EventFormPage />} />
                 </Route>
             </Route>
         </Routes>
