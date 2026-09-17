@@ -1,0 +1,70 @@
+.card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--color-bg-surface);
+    border-radius: 10px;
+    padding: 14px;
+}
+
+.userGroup {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.textCol {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.name {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.email {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+.dateLine {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+.deadlineRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.urgentBadge {
+    background: rgba(217, 89, 89, 0.15);
+    color: var(--color-danger);
+    border-radius: 8px;
+    padding: 2px 7px;
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.buttonsRow {
+    display: flex;
+    gap: 12px;
+    margin-top: 4px;
+}
+.buttonsRow > * {
+    flex: 1;
+}
+
+.modalButtonsRow {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+.modalButtonsRow > * {
+    flex: 1;
+}
