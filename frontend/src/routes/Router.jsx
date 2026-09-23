@@ -38,6 +38,7 @@ import MySessionsPage from "../pages/my_sessions/MySessionsPage.jsx";
 import CreateSessionPage from "../pages/create_session/CreateSessionPage.jsx";
 import InviteParticipantPage from "../pages/invite_participant/InviteParticipantPage.jsx";
 import SessionDetailPage from "../pages/session_detail/SessionDetailPage.jsx";
+import CalendarPage from "../pages/calendar/CalendarPage.jsx";
 
 const Router = () => {
     return (
@@ -78,6 +79,7 @@ const Router = () => {
                 <Route path="/sessions/new-session" element={<CreateSessionPage />} />
                 <Route path="/sessions/new-session/invite" element={<InviteParticipantPage />} />
                 <Route path="/sessions/:id" element={<SessionDetailPage />} />
+                <Route path="/calendar" element={<CalendarPage />} />
 
                 <Route element={<AdminLayout />}>
                     <Route path="/admin" element={<AdminDashboardPage />} />

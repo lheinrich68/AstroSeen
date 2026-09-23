@@ -21,7 +21,7 @@ const GRAY = 'var(--color-text-muted)'
 
 //? Seules les stats les plus "actionnables"/pertinentes au quotidien restent
 //  ici. Le reste (engagement détaillé, rétention, répartitions...) est dans
-//  StatisticsPage, accessible via /administration/statistiques.
+//  StatisticsPage, accessible via /admin/statistics.
 const MOCK_STATS = [
     { value: '1 284', label: 'Utilisateurs actifs', icon: Users, color: 'var(--color-accent-signal)' },
     { value: '186', label: 'Utilisateurs actifs (jour)', icon: Activity, color: YELLOW },
@@ -39,7 +39,7 @@ const MOCK_STATS = [
         label: 'Demandes de suppression',
         icon: UserX,
         color: GRAY,
-        to: '/administration/suppressions',
+        to: '/admin/deletions',
     },
 ]
 

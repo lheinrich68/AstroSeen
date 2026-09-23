@@ -6,8 +6,8 @@ import Input from "../../components/atoms/input/Input.jsx";
 import TextArea from "../../components/atoms/text_area/TextArea.jsx";
 import Button from "../../components/atoms/button/Button.jsx";
 import Select from "../../components/atoms/select/Select.jsx";
+import { EVENT_TYPES } from "../../utils/eventTypes.js";
 import styles from "./EventFormPage.module.css"
-import EventsListPage from "../events_list/EventsListPage.jsx";
 
 //* PAS ENCORE branché à un backend => données d'édition en dur.
 //TODO: À remplacer par GET /admin/events/:id (pré-remplissage) et
@@ -16,13 +16,17 @@ import EventsListPage from "../events_list/EventsListPage.jsx";
 //? "Objet concerné" est un simple champ texte ici, le HiFi montre une
 //  recherche dans le catalogue du Planétarium (autocomplete), pas encore
 //  construite. À relier une fois le Planétarium disponible.
+
+//? Type d'événement : options tirées de EVENT_TYPES (src/utils/eventTypes.js),
+//  la même palette de catégories utilisée pour colorer les points du
+//  calendrier -> garder les deux synchronisés plutôt que dupliquer la liste.
 const MOCK_EVENTS = {
     ev1: {
         name: 'Éclipse partielle de Lune',
         description: '',
         startDate: '2026-09-18',
         endDate: '',
-        type: 'Éclipse',
+        type: 'lunar',
         importance: 'Majeur',
         object: 'Lune',
     },
@@ -31,7 +35,7 @@ const MOCK_EVENTS = {
         description: '',
         startDate: '2026-08-12',
         endDate: '',
-        type: 'Pluie de météores',
+        type: 'meteor_shower',
         importance: 'Majeur',
         object: '',
     },
@@ -40,7 +44,7 @@ const MOCK_EVENTS = {
         description: '',
         startDate: '2026-11-03',
         endDate: '',
-        type: 'Opposition',
+        type: 'planetary',
         importance: 'Mineur',
         object: 'Jupiter',
     },
@@ -127,17 +131,16 @@ const EventFormPage = () => {
 
                 <Select
                     label="Type d'événement *"
-                    placeholder="Éclipse, Pluie de météores..."
+                    placeholder="Choisissez une catégorie"
                     value={values.type}
                     onChange={handleChange('type')}
                     required
                 >
-                    <option value="Éclipse">Éclipse</option>
-                    <option value="Pluie de météores">Pluie de météores</option>
-                    <option value="Opposition">Opposition</option>
-                    <option value="Conjonction">Conjonction</option>
-                    <option value="Transit">Transit</option>
-                    <option value="Autre">Autre</option>
+                    {Object.entries(EVENT_TYPES).map(([key, { label }]) => (
+                        <option key={key} value={key}>
+                            {label}
+                        </option>
+                    ))}
                 </Select>
 
                 <Select

@@ -71,7 +71,7 @@ const ProfilePage = () => {
                     </>
                 )}
                 <hr className={styles.divider} />
-                <MenuRow to="/parametres" icon={Settings} label="Paramètres" />
+                <MenuRow to="/settings" icon={Settings} label="Paramètres" />
                 <hr className={styles.divider} />
                 <button type="button" className={styles.logoutButton} onClick={handleLogout}>
                     <div className={styles.logoutIconWrapper}>

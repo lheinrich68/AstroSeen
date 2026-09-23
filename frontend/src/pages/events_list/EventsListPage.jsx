@@ -39,7 +39,7 @@ const INITIAL_EVENTS = [
 
 const EventsListPage = () => {
     const navigate = useNavigate();
-    const [events, setEvents] = useState([INITIAL_EVENTS]);
+    const [events, setEvents] = useState(INITIAL_EVENTS);
 
     const handleEdit = (event) => {
         navigate(`/admin/events/${event.id}/edit`)
@@ -60,7 +60,7 @@ const EventsListPage = () => {
 
             <h1 className={styles.title}>Événements</h1>
 
-            <Button variant="outline" className={styles.addButton} onClick={() => navigate('/admin/events/new')}>
+            <Button variant="outline" className={styles.addButton} onClick={() => navigate('/admin/events/new-event')}>
                 <Plus size={15} />
                 Créer un événement
             </Button>

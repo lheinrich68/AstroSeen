@@ -3,7 +3,7 @@ import AdminSidebar from "../../components/organisms/admin_sidebar/AdminSidebar.
 import styles from "./AdminLayout.module.css"
 
 // À nicher sous AppLayout dans le router, autour de toutes les routes
-// /administration/* (pas /moderation, qui reste sous AppLayout seul — la
+// /admin/* (pas /moderation, qui reste sous AppLayout seul — la
 // sidebar y pointe simplement en lien, sans que Modération fasse partie de
 // cette arborescence de routes).
 const AdminLayout = () => {

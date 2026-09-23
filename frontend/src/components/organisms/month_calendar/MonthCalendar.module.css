@@ -1,0 +1,152 @@
+.card {
+    background: var(--color-bg-surface);
+    border-radius: 12px;
+    padding: 16px;
+}
+@media (min-width: 768px) {
+    .card {
+        padding: 28px;
+    }
+}
+
+.headerRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+@media (min-width: 768px) {
+    .headerRow {
+        margin-bottom: 20px;
+    }
+}
+
+.navButton {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    display: flex;
+    padding: 4px;
+}
+.navButton:hover {
+    color: var(--color-text-primary);
+}
+
+.monthLabel {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    text-transform: capitalize;
+}
+
+.weekdaysRow {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    margin-bottom: 6px;
+}
+@media (min-width: 768px) {
+    .weekdaysRow {
+        margin-bottom: 12px;
+    }
+}
+
+.weekday {
+    text-align: center;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+}
+.weekdayFull {
+    display: none;
+}
+@media (min-width: 768px) {
+    .weekdayShort {
+        display: none;
+    }
+    .weekdayFull {
+        display: inline;
+        text-transform: capitalize;
+    }
+}
+
+.daysGrid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.dayCell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 0;
+    border-radius: 8px;
+    background: none;
+    border: none;
+    font-size: 0.8125rem;
+    color: var(--color-text-primary);
+}
+@media (min-width: 768px) {
+    .dayCell {
+        padding: 32px 0;
+        font-size: 1rem;
+        gap: 8px;
+    }
+}
+.dayCell:hover {
+    background: var(--color-bg-surface-high);
+}
+
+.dayOutsideMonth {
+    color: var(--color-text-muted);
+    opacity: 0.4;
+}
+
+.daySelected {
+    background: var(--color-bg-surface-high);
+    font-weight: 700;
+}
+
+.dayToday {
+    color: var(--color-accent-signal);
+    font-weight: 700;
+}
+
+.dotsRow {
+    display: flex;
+    gap: 3px;
+    height: 4px;
+}
+@media (min-width: 768px) {
+    .dotsRow {
+        height: 6px;
+        gap: 4px;
+    }
+}
+
+.dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+}
+@media (min-width: 768px) {
+    .dot {
+        width: 6px;
+        height: 6px;
+    }
+}
+.legendRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin-top: 14px;
+}
+
+.legendItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
