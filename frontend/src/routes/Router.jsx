@@ -34,6 +34,10 @@ import ReferenceTablesListPage from "../pages/reference_tables_list/ReferenceTab
 import ManageReferenceTablePage from "../pages/manage_reference_table/ManageReferenceTablePage.jsx";
 import EventsListPage from "../pages/events_list/EventsListPage.jsx";
 import EventFormPage from "../pages/event_form/EventFormPage.jsx";
+import MySessionsPage from "../pages/my_sessions/MySessionsPage.jsx";
+import CreateSessionPage from "../pages/create_session/CreateSessionPage.jsx";
+import InviteParticipantPage from "../pages/invite_participant/InviteParticipantPage.jsx";
+import SessionDetailPage from "../pages/session_detail/SessionDetailPage.jsx";
 
 const Router = () => {
     return (
@@ -55,21 +59,25 @@ const Router = () => {
             <Route element={<AppLayout />}>
                 <Route path="/feed" element={<FeedPage />} />
                 <Route path="/post/:id" element={<PostDetailPage />} />
-                <Route path="/new-post" element={<CreatePostPage />} />
+                <Route path="/post/new-post" element={<CreatePostPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/profile/:username" element={<PublicProfilePage />} />
                 <Route path="/profile/edit" element={<EditProfilePage />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/my-equipment" element={<MyEquipmentPage />} />
-                <Route path="/my-equipment/new" element={<NewEquipmentPage />} />
+                <Route path="/my-equipment/new-equipment" element={<NewEquipmentPage />} />
                 <Route path="/my-equipment/:id/edit" element={<NewEquipmentPage />} />
-                <Route path="/my-equipment/sets/new" element={<SetPage />} />
+                <Route path="/my-equipment/sets/new-set" element={<SetPage />} />
                 <Route path="/my-equipment/sets/:id/edit" element={<SetPage />} />
                 <Route path="/my-places" element={<MyPlacesPage />} />
-                <Route path="/my-places/new" element={<NewPlacePage />} />
+                <Route path="/my-places/new-place" element={<NewPlacePage />} />
                 <Route path="/my-places/:id/edit" element={<NewPlacePage />} />
                 <Route path="/moderation" element={<ReportsQueuePage />} />
                 <Route path="/moderation/:id" element={<ReviewReportPage />} />
+                <Route path="/sessions" element={<MySessionsPage />} />
+                <Route path="/sessions/new-session" element={<CreateSessionPage />} />
+                <Route path="/sessions/new-session/invite" element={<InviteParticipantPage />} />
+                <Route path="/sessions/:id" element={<SessionDetailPage />} />
 
                 <Route element={<AdminLayout />}>
                     <Route path="/admin" element={<AdminDashboardPage />} />
@@ -79,7 +87,7 @@ const Router = () => {
                     <Route path="/admin/reference-tables" element={<ReferenceTablesListPage />} />
                     <Route path="/admin/reference-tables/:slug" element={<ManageReferenceTablePage />} />
                     <Route path="/admin/events" element={<EventsListPage />} />
-                    <Route path="/admin/events/new" element={<EventFormPage />} />
+                    <Route path="/admin/events/new-event" element={<EventFormPage />} />
                     <Route path="/admin/events/:id/edit" element={<EventFormPage />} />
                 </Route>
             </Route>

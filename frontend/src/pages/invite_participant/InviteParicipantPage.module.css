@@ -1,0 +1,136 @@
+.page {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 20px 20px 40px;
+}
+@media (min-width: 768px) {
+    .page {
+        max-width: 560px;
+        padding: 40px 20px 60px;
+    }
+}
+
+.page > * {
+    animation: fadeInUp 0.6s ease-out both;
+}
+.page > *:nth-child(1) { animation-delay: 0s; }
+.page > *:nth-child(2) { animation-delay: 0.1s; }
+.page > *:nth-child(3) { animation-delay: 0.2s; }
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .page > * {
+        animation: none;
+    }
+}
+
+.backLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    margin-bottom: 16px;
+}
+.backLink:hover {
+    color: var(--color-text-primary);
+}
+
+.title {
+    font-size: 1.375rem;
+    color: var(--color-text-primary);
+    margin: 0 0 16px;
+}
+
+.selectedRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--color-bg-surface-high);
+    border-radius: 16px;
+    padding: 4px 6px 4px 4px;
+    font-size: 0.8125rem;
+    color: var(--color-text-primary);
+}
+
+.chipRemove {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    display: flex;
+}
+.chipRemove:hover {
+    color: var(--color-danger);
+}
+
+.sectionTitle {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    margin: 16px 0 8px;
+}
+
+.resultsList {
+    display: flex;
+    flex-direction: column;
+}
+
+.resultRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(139, 147, 167, 0.1);
+}
+.resultRow:last-child {
+    border-bottom: none;
+}
+
+.resultUser {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.resultName {
+    font-size: 0.875rem;
+    color: var(--color-text-primary);
+}
+
+.addButton {
+    background: none;
+    border: none;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-accent-signal);
+}
+
+.submitButtonRow {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.empty {
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+    padding: 12px 0;
+}

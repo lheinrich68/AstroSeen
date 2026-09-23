@@ -1,0 +1,282 @@
+.page {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 20px 20px 40px;
+}
+@media (min-width: 768px) {
+    .page {
+        max-width: 1020px;
+        padding: 40px 20px 60px;
+    }
+}
+
+.page > * {
+    animation: fadeInUp 0.6s ease-out both;
+}
+.page > *:nth-child(1) { animation-delay: 0s; }
+.page > *:nth-child(2) { animation-delay: 0.1s; }
+.page > *:nth-child(3) { animation-delay: 0.2s; }
+.page > *:nth-child(4) { animation-delay: 0.3s; }
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .page > * {
+        animation: none;
+    }
+}
+
+.backLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    margin-bottom: 16px;
+}
+.backLink:hover {
+    color: var(--color-text-primary);
+}
+
+.titleRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.title {
+    font-size: 1.25rem;
+    color: var(--color-text-primary);
+}
+
+.actionsRow {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.actionButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--color-bg-surface-high);
+    border: none;
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+}
+.actionButton:hover {
+    color: var(--color-text-primary);
+}
+.actionDanger:hover {
+    color: var(--color-danger);
+}
+
+/* Grille responsive : ordre mobile linéaire (zones empilées), regroupé en
+   2 colonnes indépendantes sur desktop — cf. HiFi "Détail de session
+   (desktop)" : gauche = Description/Notes/Photos, droite =
+   Infos/Participants/Journal. Les zones permettent cette réorganisation
+   sans dupliquer le contenu dans le DOM. */
+.contentGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    grid-template-areas:
+    "description"
+    "info"
+    "participants"
+    "notes"
+    "photos"
+    "activity";
+}
+@media (min-width: 768px) {
+    .contentGrid {
+        grid-template-columns: 620px 360px;
+        grid-template-areas:
+      "description info"
+      "notes participants"
+      "photos activity";
+    }
+}
+
+.descriptionArea { grid-area: description; }
+.infoArea { grid-area: info; }
+.participantsArea { grid-area: participants; }
+.notesArea { grid-area: notes; }
+.photosArea { grid-area: photos; }
+.activityArea { grid-area: activity; }
+
+.description {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+}
+
+.infoCard {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--color-bg-surface);
+    border-radius: 10px;
+    padding: 16px;
+}
+
+.infoRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8125rem;
+}
+
+.infoLabel {
+    color: var(--color-text-muted);
+    width: 70px;
+    flex-shrink: 0;
+}
+
+.infoValue {
+    color: var(--color-text-primary);
+}
+
+.infoChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--color-bg-surface-high);
+    color: var(--color-text-primary);
+    border-radius: 10px;
+    padding: 3px 9px;
+    font-size: 0.75rem;
+}
+
+.sectionHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.sectionTitle {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.sectionAction {
+    background: none;
+    border: none;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-accent-signal);
+}
+
+.participantsList {
+    display: flex;
+    flex-direction: column;
+}
+
+.noteCard {
+    background: var(--color-bg-surface);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+.noteCard:last-child {
+    margin-bottom: 0;
+}
+
+.noteHeadRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.noteAuthorGroup {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.noteAuthorName {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.noteTitle {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0 0 2px;
+}
+
+.noteExcerpt {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+.photosGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.photoTile {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    background: var(--color-bg-surface-high);
+    overflow: hidden;
+    border: none;
+    padding: 0;
+}
+
+.photoImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photoExpandIcon {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    color: rgba(231, 233, 240, 0.8);
+}
+
+.activityIconRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sectionTitleIcon {
+    color: var(--color-text-muted);
+}
+
+.activityLog {
+    display: flex;
+    flex-direction: column;
+}
+
+.modalButtonsRow {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}

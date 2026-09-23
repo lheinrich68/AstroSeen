@@ -1,0 +1,55 @@
+.row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+}
+
+.userGroup {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.name {
+    font-size: 0.875rem;
+    color: var(--color-text-primary);
+}
+
+.rightGroup {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.statusPill {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 3px 9px;
+}
+
+.statusConfirmed {
+    background: rgba(79, 216, 224, 0.15);
+    color: var(--color-accent-signal);
+}
+
+.statusHost {
+    background: rgba(242, 184, 114, 0.15);
+    color: var(--color-accent-starlight);
+}
+
+.statusInvited {
+    background: var(--color-bg-surface-high);
+    color: var(--color-text-muted);
+}
+
+.removeButton {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    display: flex;
+}
+.removeButton:hover {
+    color: var(--color-danger);
+}
